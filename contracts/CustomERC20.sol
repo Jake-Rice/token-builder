@@ -26,7 +26,7 @@ contract CustomERC20 is ERC20, ERC20Burnable {
 
     //allows owner to mint additional tokens to any non-zero address
     function mintTo(address account, uint256 amount) public OnlyOwner {
-        _mint(owner, amount);
+        _mint(account, amount);
     }
 
     function decimals() public view override returns (uint8) {
