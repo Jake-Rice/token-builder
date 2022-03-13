@@ -3,16 +3,17 @@ const { ethers } = require("hardhat");
 
 describe("CustomERC20Builder Contract", function () {
   let Builder, builder, tokenAddr, token, addr;
+
   beforeEach(async function() {
     Builder = await ethers.getContractFactory("CustomERC20Builder");
     builder = await Builder.deploy();
-
     const tx = await builder.buildERC20(
       "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
       "100000000",
       "TestCoin",
       "TST",
-      "2"
+      "2",
+      {"value": ethers.utils.parseEther("0.001")}
     );
     const rc = await tx.wait();
     const event = rc.events.find(e => e.event === "TokenDeployment");
@@ -23,8 +24,11 @@ describe("CustomERC20Builder Contract", function () {
   });
 
   describe("Builder Deployment", function() {
-    it("Should Deploy a builder contract", async function() {
+    it("Should deploy a builder contract with correct owner", async function() {
       expect((await builder.owner()).toLowerCase()).to.equal(addr[0].address.toLowerCase());
+    });
+    it("Should set the correct default price", async function() {
+      expect((await builder.price())).to.equal(ethers.utils.parseEther("0.001"));
     });
   });
 
@@ -39,12 +43,34 @@ describe("CustomERC20Builder Contract", function () {
         "100000000",
         "TestCoin",
         "TST",
-        "2"
+        "2",
+        {"value": ethers.utils.parseEther("0.001")}
       );
       const rc = await tx.wait();
       const event = rc.events.find(e => e.event === "TokenDeployment");
 
       expect(event.args.tokenAddress).to.not.equal(tokenAddr);
+    });
+
+    it("Should revert if payment not supplied", async function() {
+      await expect(builder.buildERC20(
+        "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+        "100000000",
+        "TestCoin",
+        "TST",
+        "2"
+      )).to.be.revertedWith("Error: Insufficient payment");
+    });
+
+    it("Should revert if not enough payment supplied", async function() {
+      await expect(builder.buildERC20(
+        "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+        "100000000",
+        "TestCoin",
+        "TST",
+        "2",
+        {"value": ethers.utils.parseEther("0.000999999999999999")}
+      )).to.be.revertedWith("Error: Insufficient payment");
     });
 
     it("Should set the correct owner", async function () {
@@ -149,6 +175,7 @@ describe("CustomERC20Builder Contract", function () {
       await expect(token.connect(addr[1]).mintTo(ethers.constants.AddressZero, 5000)).to.be.revertedWith("ERC20: mint to the zero address");
     });
   });
+
   describe("Burning", function() {
     it("Should allow token holder to burn tokens", async function() {
       const initialBalance1 = await token.balanceOf(addr[1].address);
@@ -159,6 +186,22 @@ describe("CustomERC20Builder Contract", function () {
       const initialBalance1 = await token.balanceOf(addr[1].address);
       await expect(token.connect(addr[1]).burn(initialBalance1.add(1))).to.be.revertedWith("ERC20: burn amount exceeds balance");
       expect(await token.balanceOf(addr[1].address)).to.equal(initialBalance1);
+    });
+  });
+
+  describe("Withdrawing ETH", function() {
+    it("Should allow owner of builder contract to withdraw ETH balance", async function() {
+      const initialBalance0 = await addr[0].getBalance();
+      const contractBalance = await builder.getBalance();
+      const tx = await builder.withdraw();
+      const rc = await tx.wait();
+      const gas = rc.cumulativeGasUsed.mul(rc.effectiveGasPrice);
+      expect(await builder.getBalance()).to.equal(0);
+      expect(await addr[0].getBalance()).to.equal(initialBalance0.add(contractBalance).sub(gas));
+    });
+    
+    it("Should revert if non-owner of builder contract tries to withdraw ETH balance", async function() {
+      await expect(builder.connect(addr[1]).withdraw()).to.be.revertedWith("Ownable: caller is not the owner");
     });
   });
 });
