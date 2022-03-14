@@ -1,0 +1,27 @@
+form {
+    background-color: slategray;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    margin: auto;
+    padding: 1px;
+}
+  
+.form-row {
+    text-align: left;
+    margin: 15px 2%;
+}
+  
+.form-row label {
+    width: 100%;
+}
+
+.text-input {
+    width: 98%;
+    height: 25px;
+}
+
+.btn-row {
+    text-align: center;
+}
+  
