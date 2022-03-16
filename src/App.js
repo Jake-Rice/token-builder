@@ -1,16 +1,25 @@
 import logo from './logo.svg';
 import './App.css';
 import BuildForm from './Components/BuildForm.jsx';
-import ConnectButton from './Components/ConnectButton.jsx'
-import { useState } from 'react';
+import { ethers } from 'ethers';
+
+import CustomERC20Builder from './artifacts/contracts/CustomERC20Builder.sol/CustomERC20Builder.json';
+const contractAddress = '';
 
 function App() {
-  const [web3Connected, setWeb3Connected] = useState(false);
+  const build = async (name, symbol, supply, decimals, mintable, capped, pausable) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, CustomERC20Builder.abi, signer);
+    console.log(name, symbol, supply, decimals, mintable, capped, pausable);
+  }
+
   return (
     <div className="App">
       <h1>Token Builder</h1>
       <h2>Build your own ERC20 token on the Ethereum blockchain!</h2>
-      {web3Connected ? <BuildForm/> : <ConnectButton onConnect={setWeb3Connected}/>}
+      <BuildForm onSubmit={build}/>
     </div>
   );
 }
