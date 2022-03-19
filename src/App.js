@@ -3,7 +3,7 @@ import './App.css';
 import BuildForm from './Components/BuildForm.jsx';
 import { ethers } from 'ethers';
 
-import CustomERC20Builder from './artifacts/contracts/CustomERC20Builder.sol/CustomERC20Builder.json';
+import CustomERC20Builder from './artifacts/src/contracts/CustomERC20Builder.sol/CustomERC20Builder.json';
 const contractAddress = '';
 
 function App() {
