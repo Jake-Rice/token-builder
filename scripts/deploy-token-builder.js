@@ -14,7 +14,7 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const TokenBuilder = await hre.ethers.getContractFactory("TokenBuilder");
+  const TokenBuilder = await hre.ethers.getContractFactory("CustomERC20Builder");
   const tokenBuilder = await TokenBuilder.deploy();
 
   await tokenBuilder.deployed();

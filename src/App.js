@@ -4,7 +4,7 @@ import BuildForm from './Components/BuildForm.jsx';
 import { ethers } from 'ethers';
 
 import CustomERC20Builder from './artifacts/src/contracts/CustomERC20Builder.sol/CustomERC20Builder.json';
-const contractAddress = '';
+const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 function App() {
   const build = async (name, symbol, supply, decimals, mintable) => {
@@ -12,7 +12,9 @@ function App() {
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, CustomERC20Builder.abi, signer);
-    console.log(name, symbol, supply, decimals, mintable);
+    const owner = await signer.getAddress();
+    console.log(owner, supply, name, symbol, decimals, mintable);
+    await contract.buildERC20(owner, supply, name, symbol, decimals, mintable);
   }
 
   return (
