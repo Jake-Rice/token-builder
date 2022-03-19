@@ -13,6 +13,7 @@ describe("CustomERC20Builder Contract", function () {
       "TestCoin",
       "TST",
       "2",
+      true,
       {"value": ethers.utils.parseEther("0.001")}
     );
     const rc = await tx.wait();
@@ -44,6 +45,7 @@ describe("CustomERC20Builder Contract", function () {
         "TestCoin",
         "TST",
         "2",
+        true,
         {"value": ethers.utils.parseEther("0.001")}
       );
       const rc = await tx.wait();
@@ -58,7 +60,8 @@ describe("CustomERC20Builder Contract", function () {
         "100000000",
         "TestCoin",
         "TST",
-        "2"
+        "2",
+        true,
       )).to.be.revertedWith("Error: Insufficient payment");
     });
 

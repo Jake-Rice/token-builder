@@ -1,10 +1,10 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/Users/jake/workspace/token-builder/contracts/CustomERC20.sol": {
-      "lastModificationDate": 1647185711549,
-      "contentHash": "604308fee02979e024660740608b2651",
-      "sourceName": "contracts/CustomERC20.sol",
+    "/Users/jake/workspace/token-builder/src/contracts/CustomERC20.sol": {
+      "lastModificationDate": 1647651526063,
+      "contentHash": "9bd9e683eb0b54b8f5981e9aa23b92f8",
+      "sourceName": "src/contracts/CustomERC20.sol",
       "solcConfig": {
         "version": "0.8.9",
         "settings": {
@@ -223,10 +223,10 @@
         "Context"
       ]
     },
-    "/Users/jake/workspace/token-builder/contracts/CustomERC20Builder.sol": {
-      "lastModificationDate": 1647195639810,
-      "contentHash": "e9526b6a78e88e083d7e48323ca81443",
-      "sourceName": "contracts/CustomERC20Builder.sol",
+    "/Users/jake/workspace/token-builder/src/contracts/CustomERC20Builder.sol": {
+      "lastModificationDate": 1647649900338,
+      "contentHash": "1dd97674136ca99315f044494570b614",
+      "sourceName": "src/contracts/CustomERC20Builder.sol",
       "solcConfig": {
         "version": "0.8.9",
         "settings": {

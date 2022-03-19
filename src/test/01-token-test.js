@@ -10,7 +10,8 @@ describe("CustomERC20 Contract", function () {
       "100000000",
       "TestCoin",
       "TST",
-      "2"
+      "2",
+      true
     );
     addr = await ethers.getSigners();
   });

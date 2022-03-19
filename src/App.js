@@ -7,12 +7,12 @@ import CustomERC20Builder from './artifacts/contracts/CustomERC20Builder.sol/Cus
 const contractAddress = '';
 
 function App() {
-  const build = async (name, symbol, supply, decimals, mintable, capped, pausable) => {
+  const build = async (name, symbol, supply, decimals, mintable) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(contractAddress, CustomERC20Builder.abi, signer);
-    console.log(name, symbol, supply, decimals, mintable, capped, pausable);
+    console.log(name, symbol, supply, decimals, mintable);
   }
 
   return (
