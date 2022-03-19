@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract CustomERC20Builder is Ownable {
     uint256 public price;
     event TokenDeployment(address builderAddress, address tokenAddress);
-
+ 
     constructor() {
         price = 0.001 ether;
     }
