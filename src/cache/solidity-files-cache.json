@@ -224,8 +224,8 @@
       ]
     },
     "/Users/jake/workspace/token-builder/src/contracts/CustomERC20Builder.sol": {
-      "lastModificationDate": 1647649900338,
-      "contentHash": "1dd97674136ca99315f044494570b614",
+      "lastModificationDate": 1647799212830,
+      "contentHash": "355509dd10029e36feebbdec580854bc",
       "sourceName": "src/contracts/CustomERC20Builder.sol",
       "solcConfig": {
         "version": "0.8.9",
