@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/token-builder/static/css/main.e9eff34e.css",
+    "main.js": "/token-builder/static/js/main.e14ffb6d.js",
+    "static/js/787.bb5e657f.chunk.js": "/token-builder/static/js/787.bb5e657f.chunk.js",
+    "static/media/logo.svg": "/token-builder/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/token-builder/index.html",
+    "main.e9eff34e.css.map": "/token-builder/static/css/main.e9eff34e.css.map",
+    "main.e14ffb6d.js.map": "/token-builder/static/js/main.e14ffb6d.js.map",
+    "787.bb5e657f.chunk.js.map": "/token-builder/static/js/787.bb5e657f.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e9eff34e.css",
+    "static/js/main.e14ffb6d.js"
+  ]
+}
