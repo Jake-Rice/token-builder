@@ -10,8 +10,7 @@ describe("CustomERC20 Contract", function () {
       "100000000",
       "TestCoin",
       "TST",
-      "2",
-      true
+      "2"
     );
     addr = await ethers.getSigners();
   });
@@ -94,31 +93,6 @@ describe("CustomERC20 Contract", function () {
     });
   });
 
-  describe("Minting", function() {
-    it("Should mint tokens to the owner account", async function() {
-      const initialBalance1 = await token.balanceOf(addr[1].address);
-      const initialSupply = await token.totalSupply();
-      await token.connect(addr[1]).mint(5000);
-      expect(await token.totalSupply()).to.equal(initialSupply.add(5000));
-      expect(await token.balanceOf(addr[1].address)).to.equal(initialBalance1.add(5000));
-    });
-    it("Should mint tokens to a non-owner account", async function() {
-      const initialBalance0 = await token.balanceOf(addr[0].address);
-      const initialBalance1 = await token.balanceOf(addr[1].address);
-      const initialSupply = await token.totalSupply();
-      await token.connect(addr[1]).mintTo(addr[0].address, 5000);
-      expect(await token.totalSupply()).to.equal(initialSupply.add(5000));
-      expect(await token.balanceOf(addr[0].address)).to.equal(initialBalance0.add(5000));
-      expect(await token.balanceOf(addr[1].address)).to.equal(initialBalance1);
-    });
-    it("Should revert if not called by owner", async function() {
-      await expect(token.mint(5000)).to.be.revertedWith("Unauthorized: Not the owner account");
-      await expect(token.mintTo(addr[0].address, 5000)).to.be.revertedWith("Unauthorized: Not the owner account");
-    });
-    it("Should revert if minting to the zero address", async function() {
-      await expect(token.connect(addr[1]).mintTo(ethers.constants.AddressZero, 5000)).to.be.revertedWith("ERC20: mint to the zero address");
-    });
-  });
   describe("Burning", function() {
     it("Should allow token holder to burn tokens", async function() {
       const initialBalance1 = await token.balanceOf(addr[1].address);

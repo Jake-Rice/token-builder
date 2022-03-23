@@ -6,10 +6,9 @@ const BuildForm = (props) => {
   const [symbol, setSymbol] = useState('');
   const [supply, setSupply] = useState('');
   const [decimals, setDecimals] = useState('');
-  const [mintable, setMintable] = useState(true);
 
   const submit = () => {
-    props.onSubmit(name, symbol, supply, decimals, mintable);
+    props.onSubmit(name, symbol, supply, decimals);
   }
   return (
     <form>
@@ -17,7 +16,6 @@ const BuildForm = (props) => {
         <div className="form-row"><label>Symbol</label><input type="text" className="text-input" value={symbol} onChange={(e)=>setSymbol(e.target.value)}/></div>
         <div className="form-row"><label>Initial Supply</label><input type="number" className="text-input" value={supply} onChange={(e)=>setSupply(e.target.value)}/></div>
         <div className="form-row"><label># of Decimal Places</label><input type="number" className="text-input" value={decimals} onChange={(e)=>setDecimals(e.target.value)}/></div>
-        <div className="form-row"><label>Enable owner to mint additional tokens</label><input type="checkbox" checked={mintable} onChange={(e)=>setMintable(!mintable)}/></div>
         <div className="form-row btn-row"><input type="button" value="Create Token" className="btn" onClick={() => submit()}/></div>
     </form>
   )

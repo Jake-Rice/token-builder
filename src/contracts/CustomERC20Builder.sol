@@ -6,15 +6,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract CustomERC20Builder is Ownable {
     uint256 public price;
-    event TokenDeployment(address ownerAddress, address tokenAddress);
+    event TokenDeployment(address indexed ownerAddress, address indexed tokenAddress);
  
     constructor() {
         price = 0.001 ether;
     }
 
-    function buildERC20(address _tokenOwner, uint256 _initialSupply, string calldata _name, string calldata _symbol, uint8 _decimals, bool _mintable) public payable {
+    function buildERC20(address _tokenOwner, uint256 _initialSupply, string calldata _name, string calldata _symbol, uint8 _decimals) public payable {
         require(msg.value >= price, "Error: Insufficient payment");
-        CustomERC20 token = new CustomERC20(_tokenOwner, _initialSupply, _name, _symbol, _decimals, _mintable);
+        CustomERC20 token = new CustomERC20(_tokenOwner, _initialSupply, _name, _symbol, _decimals);
         emit TokenDeployment(_tokenOwner, address(token));
     }
 
