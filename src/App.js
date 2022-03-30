@@ -1,9 +1,13 @@
 import logo from './logo.svg';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import BuildForm from './Components/BuildForm.jsx';
 import Dashboard from './Components/Dashboard.jsx';
 import { ethers } from 'ethers';
 import { useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Card from 'react-bootstrap/Card';
 
 import CustomERC20Builder from './artifacts/src/contracts/CustomERC20Builder.sol/CustomERC20Builder.json';
 const contractAddress = '0x68D141E76b8CFE92A2752e0cD6BF143d48f5Ab69'; //Rinkeby
@@ -31,18 +35,20 @@ function App() {
     <div className="App">
       <h1>Token Builder</h1>
       <h2>Build your own ERC20 token on the Ethereum blockchain!</h2>
-      {newToken && <BuildForm onSubmit={build}/>}
-      {tokenDashboard && <Dashboard tokenAddress={tokenAddress}/>}
-      <div>
-        {!newToken && <input type="button" value="Create A New Token" onClick={()=>{
-          toggleTokenDashboard(false);
-          toggleNewToken(true);
-        }}/>}
-        {!tokenDashboard &&<input type="button" value="Token Dashboard" onClick={()=>{
-          toggleNewToken(false);
-          toggleTokenDashboard(true);
-        }}/>}
-      </div>
+      <Card>
+        <ButtonGroup>
+          <Button variant={!tokenDashboard ? "primary" : "secondary"} onClick={()=>{
+            toggleTokenDashboard(false);
+            toggleNewToken(true);
+          }}>Create A Token</Button>
+          <Button variant={tokenDashboard ? "primary" : "secondary"} onClick={()=>{
+            toggleNewToken(false);
+            toggleTokenDashboard(true);
+          }}>Token Dashboard</Button>
+        </ButtonGroup>
+        {newToken && <BuildForm onSubmit={build}/>}
+        {tokenDashboard && <Dashboard tokenAddress={tokenAddress}/>}
+      </Card>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './dashboard.css';
+import Button from 'react-bootstrap/Button'
 
 const Dashboard = (props) => {
     const [tokenAddress, setTokenAddress] = useState('');
@@ -23,7 +24,7 @@ const Dashboard = (props) => {
                     <h3>Transfer Tokens</h3>
                     <div className="form-row">
                         <label>Recipient</label>
-                        <input value={transferRecipient} onChange={(event)=>setTransferRecipient(event.target.value)}/><br/>
+                        <input className="text-input" value={transferRecipient} onChange={(event)=>setTransferRecipient(event.target.value)}/><br/>
                         <label>Amount</label>
                         <input type="number" value={transferAmount} onChange={(event)=>setTransferAmount(event.target.value)}/>
                         <input type="button" value="Transfer"/>
@@ -31,7 +32,7 @@ const Dashboard = (props) => {
                     <h3>Set Token Allowance</h3>
                     <div className="form-row">
                         <label>Spender</label>
-                        <input value={allowanceSpender} onChange={(event)=>setAllowanceSpender(event.target.value)}/><br/>
+                        <input className="text-input" value={allowanceSpender} onChange={(event)=>setAllowanceSpender(event.target.value)}/><br/>
                         <label>Amount</label>
                         <input type="number" value={allowanceAmount} onChange={(event)=>setAllowanceAmount(event.target.value)}/>
                         <input type="button" value="Set Allowance"/>
@@ -39,22 +40,22 @@ const Dashboard = (props) => {
                     <h3>Claim Allowance</h3>
                     <div className="form-row">
                         <label>Owner</label>
-                        <input value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
+                        <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
                         <label>Amount</label>
                         <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/><br/>
                         <label>Send to another address</label>
                         <input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/>
                         <input type="button" value="Claim Allowance"/>
                     </div>
-                    <div className="form-row btn-row"><input type="button" value="Change Token" className="btn" onClick={()=>{
+                    <div className="form-row btn-row"><Button variant="primary" onClick={() => {
                         setTokenAddress('');
                         toggleTokenAddressVerified(false);
-                    }}/></div>
+                    }}>Get Token</Button></div>
                 </form>
                 :
                 <form>
-                    <div className="form-row"><label>Token Address</label><input type="text" value={tokenAddress} onChange={(event)=>setTokenAddress(event.target.value)}/></div>
-                    <div className="form-row btn-row"><input type="button" value="Get Token" className="btn" onClick={()=>toggleTokenAddressVerified(true)}/></div>
+                    <div className="form-row"><label>Token Address</label><input type="text" value={tokenAddress} className="text-input" onChange={(event)=>setTokenAddress(event.target.value)}/></div>
+                    <div className="form-row btn-row"><Button variant="primary" onClick={() => toggleTokenAddressVerified(true)}>Get Token</Button></div>
                 </form>
             }
         </div>
