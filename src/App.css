@@ -31,11 +31,7 @@ h2 {
   border-radius: 7px;
   margin: 2px;
 }
-.btn-primary {
+.btn-primary, .btn-primary:hover, .btn-primary:focus {
   background-color: var(--color-secondary-dark);
   border-color: var(--color-primary-dark);
-}
-.btn-primary:hover, .btn-primary:focus {
-  background-color: var(--color-secondary);
-  border-color: var(--color-secondary-dark);
 }
