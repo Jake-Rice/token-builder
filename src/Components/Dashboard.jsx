@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers'
 import './dashboard.css';
 import Button from 'react-bootstrap/Button'
 
 const Dashboard = (props) => {
     const [tokenAddress, setTokenAddress] = useState('');
-    const [tokenAddressVerified, toggleTokenAddressVerified] = useState(false);
+    useEffect(() => {
+        if (props.tokenAddress !== '') {
+            verifyTokenAddress(props.tokenAddress);
+        }
+    }, [])
+
+    const [tokenAddressVerified, toggleTokenAddressVerified] = useState((tokenAddress !== '') ? true : false);
     
     const [tokenData, setTokenData] = useState({
         tokenAddress: '',
@@ -25,6 +31,7 @@ const Dashboard = (props) => {
     const [claimOwner, setClaimOwner] = useState('');
     const [claimAmount, setClaimAmount] = useState('');
     const [sendAllowance, setSendAllowance] = useState(false);
+    const [sendAddress, setSendAddress] = useState('');
 
     const verifyTokenAddress = async (addr) => {
         try {
@@ -57,6 +64,85 @@ const Dashboard = (props) => {
         } catch (e) { 
             console.error(e);
             alert('Error: Token address invalid.');
+        }
+    }
+
+    const transferTokens = async (recipient, amount) => {
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            await provider.send("eth_requestAccounts", []);
+            const signer = provider.getSigner();
+            const abi = [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function transfer(address to, uint amount) returns (bool)",
+                "event Transfer(address indexed from, address indexed to, uint amount)"
+            ];
+            const erc20 = new ethers.Contract(tokenData.tokenAddress, abi, signer);
+            const sender = await signer.getAddress();
+            const balance = await erc20.balanceOf(sender);
+            const decimals = await erc20.decimals();
+            const success = await erc20.transfer(recipient, parseAmount(amount, decimals));
+            console.log(success);
+        } catch (e) { 
+            console.error(e);
+            alert('Error: Transfer failed.');
+        }
+    }
+
+    const setTokenAllowance = async (recipient, amount) => {
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            await provider.send("eth_requestAccounts", []);
+            const signer = provider.getSigner();
+            const abi = [
+                "function allowance(address owner, address spender) view returns (uint256)",
+                "function balanceOf(address owner) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function approve(address spender, uint256 amount) returns (bool)",
+                "event Approval(address indexed owner, address indexed spender, uint256 value)"
+            ];
+            const erc20 = new ethers.Contract(tokenData.tokenAddress, abi, signer);
+            const sender = await signer.getAddress();
+            const balance = await erc20.balanceOf(sender);
+            const decimals = await erc20.decimals();
+            let success = false;
+            if (balance >= parseAmount(amount, decimals)) {
+                success = await erc20.approve(recipient, parseAmount(amount, decimals));
+            }
+            else alert('Error: Insufficient balance.');
+            const allowance = await erc20.allowance(sender, recipient);
+        } catch (e) { 
+            console.error(e);
+            alert('Error: Allowance failed.');
+        }
+    }
+
+    const transferAllowance = async (owner, recipient, amount) => {
+        try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            await provider.send("eth_requestAccounts", []);
+            const signer = provider.getSigner();
+            const abi = [
+                "function balanceOf(address owner) view returns (uint256)",
+                "function allowance(address owner, address spender) view returns (uint256)",
+                "function decimals() view returns (uint8)",
+                "function transferFrom(address from, address to, uint amount) returns (bool)",
+                "event Transfer(address indexed from, address indexed to, uint amount)"
+            ];
+            const erc20 = new ethers.Contract(tokenData.tokenAddress, abi, signer);
+            const spender = await signer.getAddress();
+            const balance = await erc20.balanceOf(owner);
+            const allowance = await erc20.allowance(owner, spender)
+            const decimals = await erc20.decimals();
+            let success = false;
+            if (balance >= parseAmount(amount, decimals) ) {
+                success = await erc20.transferFrom(owner, recipient, parseAmount(amount, decimals));
+            }
+            console.log(success);
+        } catch (e) { 
+            console.error(e);
+            alert('Error: Transfer failed.');
         }
     }
 
@@ -98,7 +184,7 @@ const Dashboard = (props) => {
                         <input className="text-input" value={transferRecipient} onChange={(event)=>setTransferRecipient(event.target.value)}/><br/>
                         <label>Amount</label>
                         <input type="number" value={transferAmount} onChange={(event)=>setTransferAmount(event.target.value)}/>
-                        <input type="button" value="Transfer"/>
+                        <input type="button" value="Transfer" onClick={() => transferTokens(transferRecipient, transferAmount)}/>
                     </div>
                     <h3>Set Token Allowance</h3>
                     <div className="form-row">
@@ -106,17 +192,21 @@ const Dashboard = (props) => {
                         <input className="text-input" value={allowanceSpender} onChange={(event)=>setAllowanceSpender(event.target.value)}/><br/>
                         <label>Amount</label>
                         <input type="number" value={allowanceAmount} onChange={(event)=>setAllowanceAmount(event.target.value)}/>
-                        <input type="button" value="Set Allowance"/>
+                        <input type="button" value="Set Allowance" onClick={() => setTokenAllowance(allowanceSpender, allowanceAmount)}/>
                     </div>
                     <h3>Claim Allowance</h3>
                     <div className="form-row">
                         <label>Owner</label>
                         <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
                         <label>Amount</label>
-                        <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/><br/>
-                        <label>Send to another address</label>
-                        <input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/>
-                        <input type="button" value="Claim Allowance"/>
+                        <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/>
+                        <input type="button" value={sendAllowance ? "Send Allowance" : "Claim Allowance"} onClick={() => transferAllowance(claimOwner, (sendAllowance ? sendAddress : tokenData.accountAddress), claimAmount)}/>
+                        <label><input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/> Send to another address</label>
+                        {sendAllowance &&
+                            <div>
+                                <label>Destination address</label>
+                                <input className="text-input" value={sendAddress} onChange={(event)=>setSendAddress(event.target.value)}/>
+                            </div>}
                     </div>
                     <div className="form-row btn-row"><Button variant="primary" onClick={() => {
                         setTokenAddress('');
