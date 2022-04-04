@@ -1,5 +1,5 @@
 :root {
-  --color-primary: #4B2FEB;
+  --color-primary: #4b2feb;
   --color-secondary: #20EB17;
   --color-primary-dark: #25109E;
   --color-secondary-dark: #1D9E18;
@@ -7,13 +7,21 @@
 }
 
 body {
-  background-color: var(--color-primary);
+  background: linear-gradient(rgba(75, 47, 235, 0.8), rgba(75, 47, 235, 0.8)), url("assets/bg.jpeg");
+  background-size: fill;
   color: white;
   text-align: center;
 }
 
+h1 {
+  font-size: 28pt;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
 h2 {
-  font-size: 10pt;
+  font-size: 18pt;
+  padding-bottom: 20px;
 }
 
 .card {
@@ -22,8 +30,7 @@ h2 {
   border-radius: 10px;
   box-shadow: 0px 0px 15px 5px var(--color-primary-dark);
   width: 80%;
-  max-width: 1000px;
-  min-width: 450px;
+  max-width: 800px;
   margin: 25px auto;
   padding: 1px;
 }
