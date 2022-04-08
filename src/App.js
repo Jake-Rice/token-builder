@@ -31,7 +31,7 @@ function App() {
         const newTokenAddress = addr;
         setTokenAddress(newTokenAddress);
         toggleInProgress(false);
-        navigate("/dashboard");
+        navigate("/token-builder/dashboard");
       } catch (e) {
         alert("Error: token not created\n"+ e.message);
         toggleInProgress(false);
