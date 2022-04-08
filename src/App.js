@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import BuildForm from './Components/BuildForm.jsx';
-import Dashboard from './Components/Dashboard.jsx';
+import DashboardCard from './Components/DashboardCard'
 import { ethers } from 'ethers';
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
@@ -45,11 +45,13 @@ function App() {
     <div className="App">
       <h1>Token Builder</h1>
       <h2>Build your own ERC20 token on the Ethereum (Rinkeby) blockchain!</h2>
-      <Link to="/build"><Button variant="primary">Create A Token</Button></Link>
-      <Link to="/dashboard"><Button variant="secondary">Token Dashboard</Button></Link>
+      <Link to="/token-builder/build"><Button variant="primary">Create A Token</Button></Link>
+      <Link to="/token-builder/dashboard"><Button variant="secondary">Token Dashboard</Button></Link>
       <Routes>
-        <Route path="build" element={<BuildForm onSubmit={build} inProgress={inProgress}/>}/>
-        <Route path="dashboard" element={<Dashboard tokenAddress={tokenAddress}/>}/>
+        <Route path="/" element={<></>}/>
+        <Route path="/token-builder/" element={<></>}/>
+        <Route path="/token-builder/build" element={<BuildForm onSubmit={build} inProgress={inProgress}/>}/>
+        <Route path="/token-builder/dashboard" element={<DashboardCard/>}/>
       </Routes>
     </div>
   );
