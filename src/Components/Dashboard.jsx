@@ -27,6 +27,9 @@ const Dashboard = (props) => {
     const [allowanceSpender, setAllowanceSpender] = useState('');
     const [allowanceAmount, setAllowanceAmount] = useState('');
 
+    const [allowanceAvailable, setAllowanceAvailable] = useState('');
+    const [validAllowance, setValidAllowance] = useState(false);
+
     const [claimOwner, setClaimOwner] = useState('');
     const [claimAmount, setClaimAmount] = useState('');
     const [sendAllowance, setSendAllowance] = useState(false);
@@ -45,6 +48,25 @@ const Dashboard = (props) => {
             erc20.removeAllListeners();
         });
     }, []);
+
+    useEffect(async () => {
+        if (/^0x[a-fA-F0-9]{40}$/.test(claimOwner)) {
+            console.log("match");
+            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            await provider.send("eth_requestAccounts", []);
+            const signer = provider.getSigner();
+            const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
+            const decimals = await erc20.decimals();
+            try {
+                const _allowance = await erc20.allowance(claimOwner, await signer.getAddress());
+                setAllowanceAvailable(formatBalance(_allowance.toString(), decimals));
+                setValidAllowance(true);
+            } catch(err) {
+                console.error(err);
+            }
+        }
+        else setValidAllowance(false);
+    }, [claimOwner]);
 
     const transferTokens = async (recipient, amount) => {
         try {
@@ -73,10 +95,10 @@ const Dashboard = (props) => {
             const balance = await erc20.balanceOf(sender);
             const decimals = await erc20.decimals();
             let success = false;
-            if (balance >= parseAmount(amount, decimals)) {
+            if (balance.gte(parseAmount(amount, decimals))) {
                 success = await erc20.approve(recipient, parseAmount(amount, decimals));
             }
-            else alert('Error: Insufficient balance.');
+            else alert("Error: Insufficient balance.")
             const allowance = await erc20.allowance(sender, recipient);
         } catch (e) { 
             console.error(e);
@@ -129,49 +151,50 @@ const Dashboard = (props) => {
     }
 
     return (
-                <Form>
-                    <h3>Token Info</h3>
-                    <div className="form-row"><label>Token Address: {props.tokenAddress}</label></div>
-                    <div className="form-row"><label>Token Name: {props.tokenData.name}</label></div>
-                    <div className="form-row"><label>Token Symbol: {props.tokenData.symbol}</label></div>
-                    <div className="form-row"><label>Account Address: {props.tokenData.accountAddress}</label></div>
-                    <div className="form-row"><label>Token Balance: {formatBalance(props.tokenData.balance.toString(), props.tokenData.decimals)} {props.tokenData.symbol}</label></div>
-                    <h3>Transfer Tokens</h3>
-                    <div className="form-row">
-                        <label>Recipient</label>
-                        <input className="text-input" value={transferRecipient} onChange={(event)=>setTransferRecipient(event.target.value)}/><br/>
-                        <label>Amount</label>
-                        <input type="number" value={transferAmount} onChange={(event)=>setTransferAmount(event.target.value)}/>
-                        <Button size="sm" variant="danger" onClick={() => transferTokens(transferRecipient, transferAmount)}>Transfer</Button>
-                    </div>
-                    <h3>Set Token Allowance</h3>
-                    <div className="form-row">
-                        <label>Spender</label>
-                        <input className="text-input" value={allowanceSpender} onChange={(event)=>setAllowanceSpender(event.target.value)}/><br/>
-                        <label>Amount</label>
-                        <input type="number" value={allowanceAmount} onChange={(event)=>setAllowanceAmount(event.target.value)}/>
-                        <Button size="sm" variant="danger" onClick={() => setTokenAllowance(allowanceSpender, allowanceAmount)}>Set Allowance</Button>
-                    </div>
-                    <h3>Claim Allowance</h3>
-                    <div className="form-row">
-                        <label>Owner</label>
-                        <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
-                        <label>Amount</label>
-                        <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/>
-                        <Button size="sm" variant="danger" onClick={() => transferAllowance(claimOwner, (sendAllowance ? sendAddress : props.tokenData.accountAddress), claimAmount)}>{sendAllowance ? "Send Allowance" : "Claim Allowance"}</Button>
-                        <label><input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/> Send to another address</label>
-                        {sendAllowance &&
-                            <div>
-                                <label>Destination address</label>
-                                <input className="text-input" value={sendAddress} onChange={(event)=>setSendAddress(event.target.value)}/>
-                            </div>}
-                    </div>
-                    <div className="form-row btn-row">
-                        <Link to="/token-builder/dashboard">
-                            <Button variant="secondary" onClick={props.reset}>Use a Different Token</Button>
-                        </Link>
-                    </div>
-                </Form>
-    );
+        <Form>
+            <h3>Token Info</h3>
+            <div className="form-row"><label>Token Address: {props.tokenAddress}</label></div>
+            <div className="form-row"><label>Token Name: {props.tokenData.name}</label></div>
+            <div className="form-row"><label>Token Symbol: {props.tokenData.symbol}</label></div>
+            <div className="form-row"><label>Account Address: {props.tokenData.accountAddress}</label></div>
+            <div className="form-row"><label>Token Balance: {formatBalance(props.tokenData.balance.toString(), props.tokenData.decimals)} {props.tokenData.symbol}</label></div>
+            <h3>Transfer Tokens</h3>
+            <div className="form-row">
+                <label>Recipient</label>
+                <input className="text-input" value={transferRecipient} onChange={(event)=>setTransferRecipient(event.target.value)}/><br/>
+                <label>Amount</label>
+                <input type="number" value={transferAmount} onChange={(event)=>setTransferAmount(event.target.value)}/>
+                <Button size="sm" variant="danger" onClick={() => transferTokens(transferRecipient, transferAmount)}>Transfer</Button>
+            </div>
+            <h3>Set Token Allowance</h3>
+            <div className="form-row">
+                <label>Spender</label>
+                <input className="text-input" value={allowanceSpender} onChange={(event)=>setAllowanceSpender(event.target.value)}/><br/>
+                <label>Amount</label>
+                <input type="number" value={allowanceAmount} onChange={(event)=>setAllowanceAmount(event.target.value)}/>
+                <Button size="sm" variant="danger" onClick={() => setTokenAllowance(allowanceSpender, allowanceAmount)}>Set Allowance</Button>
+            </div>
+            <h3>Claim Allowance</h3>
+            <div className="form-row">
+                <label>Owner</label>
+                <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
+                {validAllowance && <><label>Available Allowance: {allowanceAvailable.toString()}</label><br/></>}
+                <label>Amount</label>
+                <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/>
+                <Button size="sm" variant="danger" onClick={() => transferAllowance(claimOwner, (sendAllowance ? sendAddress : props.tokenData.accountAddress), claimAmount)}>{sendAllowance ? "Send Allowance" : "Claim Allowance"}</Button>
+                <label><input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/> Send to another address</label>
+                {sendAllowance &&
+                    <div>
+                        <label>Destination address</label>
+                        <input className="text-input" value={sendAddress} onChange={(event)=>setSendAddress(event.target.value)}/>
+                    </div>}
+            </div>
+            <div className="form-row btn-row">
+                <Link to="/token-builder/dashboard">
+                    <Button variant="secondary" onClick={props.reset}>Use a Different Token</Button>
+                </Link>
+            </div>
+        </Form>
+    )
 }
 export default Dashboard;
