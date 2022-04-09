@@ -13,6 +13,13 @@ const contractAddress = '0x96D998E65eBf1BFEdEEDaf59c8D63EC6E06175B9'; //Rinkeby
 
 function App() {
   const [tokenAddress, setTokenAddress] = useState('');
+  const [tokenData, setTokenData] = useState({
+    accountAddress: '',
+    balance: '',
+    name: '',
+    symbol: '',
+    decimals: ''
+  });
   const [inProgress, toggleInProgress] = useState(false);
 
   const build = async (name, symbol, supply, decimals) => {
@@ -41,6 +48,10 @@ function App() {
 
   const navigate = useNavigate();
 
+  const handleReset = () => {
+    setTokenAddress('');
+  }
+
   return (
     <div className="App">
       <h1>Token Builder</h1>
@@ -51,7 +62,7 @@ function App() {
         <Route path="/" element={<></>}/>
         <Route path="/token-builder/" element={<></>}/>
         <Route path="/token-builder/build" element={<BuildForm onSubmit={build} inProgress={inProgress}/>}/>
-        <Route path="/token-builder/dashboard" element={<DashboardCard/>}/>
+        <Route path="/token-builder/dashboard" element={<DashboardCard tokenAddress={tokenAddress} setTokenAddress={setTokenAddress} tokenData={tokenData} setTokenData={setTokenData} reset={handleReset}/>}/>
       </Routes>
     </div>
   );

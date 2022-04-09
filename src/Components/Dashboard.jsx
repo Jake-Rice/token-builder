@@ -2,22 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers'
 import './dashboard.css';
 import { Link } from 'react-router-dom';
-import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button'
+import abi from './abi'
 
-const abi = [
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function balanceOf(address owner) view returns (uint256)",
-    "function decimals() view returns (uint8)",
-    "function name() view returns (string)",
-    "function symbol() view returns (string)",
-    "function transfer(address to, uint amount) returns (bool)",
-    "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "event Approval(address indexed owner, address indexed spender, uint256 value)",
-    "event Transfer(address indexed from, address indexed to, uint amount)"
-];
+const rxAddress = /^0x[a-fA-F0-9]{40}$/;
 
 const Dashboard = (props) => {
 
@@ -50,8 +39,7 @@ const Dashboard = (props) => {
     }, []);
 
     useEffect(async () => {
-        if (/^0x[a-fA-F0-9]{40}$/.test(claimOwner)) {
-            console.log("match");
+        if (rxAddress.test(claimOwner)) {
             const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
             await provider.send("eth_requestAccounts", []);
             const signer = provider.getSigner();
@@ -158,6 +146,7 @@ const Dashboard = (props) => {
             <div className="form-row"><label>Token Symbol: {props.tokenData.symbol}</label></div>
             <div className="form-row"><label>Account Address: {props.tokenData.accountAddress}</label></div>
             <div className="form-row"><label>Token Balance: {formatBalance(props.tokenData.balance.toString(), props.tokenData.decimals)} {props.tokenData.symbol}</label></div>
+            <hr/>
             <h3>Transfer Tokens</h3>
             <div className="form-row">
                 <label>Recipient</label>
@@ -166,6 +155,7 @@ const Dashboard = (props) => {
                 <input type="number" value={transferAmount} onChange={(event)=>setTransferAmount(event.target.value)}/>
                 <Button size="sm" variant="danger" onClick={() => transferTokens(transferRecipient, transferAmount)}>Transfer</Button>
             </div>
+            <hr/>
             <h3>Set Token Allowance</h3>
             <div className="form-row">
                 <label>Spender</label>
@@ -174,11 +164,12 @@ const Dashboard = (props) => {
                 <input type="number" value={allowanceAmount} onChange={(event)=>setAllowanceAmount(event.target.value)}/>
                 <Button size="sm" variant="danger" onClick={() => setTokenAllowance(allowanceSpender, allowanceAmount)}>Set Allowance</Button>
             </div>
+            <hr/>
             <h3>Claim Allowance</h3>
             <div className="form-row">
                 <label>Owner</label>
                 <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
-                {validAllowance && <><label>Available Allowance: {allowanceAvailable.toString()}</label><br/></>}
+                {validAllowance && <><label>Available Allowance: {allowanceAvailable.toString()} {props.tokenData.symbol}</label><br/></>}
                 <label>Amount</label>
                 <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/>
                 <Button size="sm" variant="danger" onClick={() => transferAllowance(claimOwner, (sendAllowance ? sendAddress : props.tokenData.accountAddress), claimAmount)}>{sendAllowance ? "Send Allowance" : "Claim Allowance"}</Button>

@@ -3,29 +3,15 @@ import { ethers } from 'ethers';
 import Card from 'react-bootstrap/Card';
 import TokenEntry from './TokenEntry';
 import Dashboard from './Dashboard'
+import abi from './abi'
 
-const abi = [
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function balanceOf(address owner) view returns (uint256)",
-    "function decimals() view returns (uint8)",
-    "function name() view returns (string)",
-    "function symbol() view returns (string)",
-    "function transfer(address to, uint amount) returns (bool)",
-    "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "event Approval(address indexed owner, address indexed spender, uint256 value)",
-    "event Transfer(address indexed from, address indexed to, uint amount)"
-];
+const DashboardCard = (props) => {
 
-const DashboardCard = () => {
-    const [tokenAddress, setTokenAddress] = useState('');
-    const [tokenData, setTokenData] = useState({
-        accountAddress: '',
-        balance: '',
-        name: '',
-        symbol: '',
-        decimals: ''
-    });
+    useEffect(() => {
+        if (props.tokenAddress!=='') {
+            handleSubmit(props.tokenAddress);
+        }
+    }, []);
 
     const handleSubmit = async (addr) => {
         try {
@@ -40,28 +26,23 @@ const DashboardCard = () => {
             const pDecimals = erc20.decimals();
             const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
             const balance = await erc20.balanceOf(user);
-            
-            setTokenData({
+            props.setTokenAddress(addr);
+            props.setTokenData({
                 accountAddress: user,
                 balance: balance.toString(),
                 name: name,
                 symbol: symbol,
                 decimals: decimals
             });
-            setTokenAddress(addr);
         } catch (e) { 
             console.error(e);
             alert('Error: Token address invalid.');
         }
     }
 
-    const handleReset = () => {
-        setTokenAddress('');
-    }
-
     return (
         <Card>
-            {(tokenAddress==='') ? <TokenEntry submit={handleSubmit}/> : <Dashboard tokenAddress={tokenAddress} tokenData={tokenData} setTokenData={setTokenData} reset={handleReset}/>}
+            {(props.tokenAddress==='') ? <TokenEntry submit={handleSubmit}/> : <Dashboard tokenAddress={props.tokenAddress} tokenData={props.tokenData} setTokenData={props.setTokenData} reset={props.reset}/>}
         </Card>
     )
 }
