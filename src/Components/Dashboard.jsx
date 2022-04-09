@@ -33,6 +33,23 @@ const Dashboard = (props) => {
         erc20.on(filter, async (from, to, amount, event) => {
             props.setTokenData({...props.tokenData, balance: await erc20.balanceOf(props.tokenData.accountAddress)});
         });
+        provider.provider.on("accountsChanged", async () => {
+            const signer = provider.getSigner();
+            const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
+            const pUser = signer.getAddress();
+            const pName = erc20.name();
+            const pSymbol = erc20.symbol();
+            const pDecimals = erc20.decimals();
+            const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
+            const balance = await erc20.balanceOf(user);
+            props.setTokenData({
+                accountAddress: user,
+                balance: balance.toString(),
+                name: name,
+                symbol: symbol,
+                decimals: decimals
+            });
+        });
         return (()=>{
             erc20.removeAllListeners();
         });
