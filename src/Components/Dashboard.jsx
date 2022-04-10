@@ -38,16 +38,19 @@ const Dashboard = (props) => {
     }, [claimOwner]);
 
     useEffect(async () => {
+        props.web3.contract.removeAllListeners();
         if (props.tokenData.accountAddress) {
             // transfer()
             const filter = props.web3.contract.filters.Transfer(props.tokenData.accountAddress);
             props.web3.contract.on(filter, async (from, to, amount, event) => {
+                console.log("transfer!")
                 const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
                 props.updateTokenData({...props.tokenData, balance: bal.toString()});
             });
             // transferFrom()
             const filter2 = props.web3.contract.filters.Transfer(null, props.tokenData.accountAddress);
             props.web3.contract.on(filter2, async (from, to, amount, event) => {
+                console.log("transferFrom!")
                 const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
                 const dec = await props.web3.contract.decimals();
                 props.updateTokenData({...props.tokenData, balance: bal.toString()});
@@ -82,6 +85,7 @@ const Dashboard = (props) => {
             const pSymbol = props.web3.contract.symbol();
             const pDecimals = props.web3.contract.decimals();
             const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
+            console.log(user);
             const balance = await props.web3.contract.balanceOf(user);
             props.updateTokenData({
                 accountAddress: user,
