@@ -13,6 +13,7 @@ const TokenEntry = (props) => {
 
     return (
         <Form onSubmit={handleSubmit}>
+            <h3>Token Dashboard</h3>
             <div className="form-row"><label>Token Address</label><input type="text" value={tokenAddress} className="text-input" onChange={(event)=>setTokenAddress(event.target.value)}/></div>
             <div className="form-row btn-row"><Button variant="primary" onClick={handleSubmit}>Get Token</Button></div>
         </Form>

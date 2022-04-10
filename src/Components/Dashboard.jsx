@@ -182,7 +182,7 @@ const Dashboard = (props) => {
 
     return (
         <Form>
-            <h3>Token Info</h3>
+            <h3>Token Dashboard</h3>
             <div className="form-row"><label>Token Address: {props.tokenAddress}</label></div>
             <div className="form-row"><label>Token Name: {props.tokenData.name}</label></div>
             <div className="form-row"><label>Token Symbol: {props.tokenData.symbol}</label></div>

@@ -43,7 +43,7 @@ const DashboardCard = (props) => {
     }
 
     return (
-        <Card>
+        <Card className="card card-app">
             {(props.tokenAddress==='') ? <TokenEntry submit={handleSubmit}/> : <Dashboard web3={props.web3} tokenAddress={props.tokenAddress} tokenData={tokenData} updateTokenData={updateTokenData} reset={props.reset}/>}
         </Card>
     )
