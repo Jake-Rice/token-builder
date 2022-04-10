@@ -38,27 +38,43 @@ const Dashboard = (props) => {
     }, [claimOwner]);
 
     useEffect(async () => {
-        // transfer()
-        const filter = props.web3.contract.filters.Transfer(props.tokenData.accountAddress);
-        props.web3.contract.on(filter, async (from, to, amount, event) => {
-            const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
-            props.updateTokenData({...props.tokenData, balance: bal.toString()});
-        });
-        // transferFrom()
-        const filter2 = props.web3.contract.filters.Transfer(null, props.tokenData.accountAddress);
-        props.web3.contract.on(filter2, async (from, to, amount, event) => {
-            const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
-            const dec = await props.web3.contract.decimals();
-            props.updateTokenData({...props.tokenData, balance: bal.toString()});
-            const _allowance = await props.web3.contract.allowance(from, to);
-            setAllowanceAvailable(formatBalance(_allowance.toString(), dec));
-        });
+        if (props.tokenData.accountAddress) {
+            // transfer()
+            const filter = props.web3.contract.filters.Transfer(props.tokenData.accountAddress);
+            props.web3.contract.on(filter, async (from, to, amount, event) => {
+                const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
+                props.updateTokenData({...props.tokenData, balance: bal.toString()});
+            });
+            // transferFrom()
+            const filter2 = props.web3.contract.filters.Transfer(null, props.tokenData.accountAddress);
+            props.web3.contract.on(filter2, async (from, to, amount, event) => {
+                const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
+                const dec = await props.web3.contract.decimals();
+                props.updateTokenData({...props.tokenData, balance: bal.toString()});
+                const _allowance = await props.web3.contract.allowance(from, to);
+                setAllowanceAvailable(formatBalance(_allowance.toString(), dec));
+            });
+        }
         return (()=>{
             props.web3.contract.removeAllListeners();
         });
     }, [props.tokenData.accountAddress]);
 
     useEffect(async () => {
+        const erc20 = new ethers.Contract(props.tokenAddress, abi, props.web3.signer)
+        const pUser = props.web3.signer.getAddress();
+        const pName = erc20.name();
+        const pSymbol = erc20.symbol();
+        const pDecimals = erc20.decimals();
+        const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
+        const balance = await erc20.balanceOf(user);
+        props.updateTokenData({
+            accountAddress: user,
+            balance: balance.toString(),
+            name: name,
+            symbol: symbol,
+            decimals: decimals
+        });
         props.web3.provider.provider.on("accountsChanged", async () => {
             const signer = props.web3.provider.getSigner();
             const pUser = signer.getAddress();

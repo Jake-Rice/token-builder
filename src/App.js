@@ -41,8 +41,8 @@ function App() {
         const rc = await tx.wait();
         const event = rc.events.find(event => event.event === 'TokenDeployment');
         const [own, addr] = event.args;
-        setWeb3({...web3, contract: new ethers.Contract(addr, abi, web3.signer)});
-        console.log(web3.contract);
+        const newContract = new ethers.Contract(addr, abi, web3.signer);
+        setWeb3({...web3, contract: newContract});
         setTokenAddress(addr);
         toggleInProgress(false);
         navigate("/token-builder/dashboard");

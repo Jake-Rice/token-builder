@@ -17,13 +17,13 @@ const DashboardCard = (props) => {
     const handleSubmit = async (addr) => {
         try {
             const erc20 = new ethers.Contract(addr, abi, props.web3.signer)
+            props.updateContract(erc20);
             const pUser = props.web3.signer.getAddress();
             const pName = erc20.name();
             const pSymbol = erc20.symbol();
             const pDecimals = erc20.decimals();
             const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
             const balance = await erc20.balanceOf(user);
-            props.updateContract(erc20);
             setTokenData({
                 accountAddress: user,
                 balance: balance.toString(),
@@ -40,7 +40,6 @@ const DashboardCard = (props) => {
 
     const updateTokenData = (data) => {
         setTokenData(data);
-        console.log(data);
     }
 
     return (
