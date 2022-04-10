@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/token-builder/static/css/main.7ebd623b.css",
-    "main.js": "/token-builder/static/js/main.f5b5c2b0.js",
+    "main.js": "/token-builder/static/js/main.5bfdbdd7.js",
     "static/js/787.bb5e657f.chunk.js": "/token-builder/static/js/787.bb5e657f.chunk.js",
     "static/media/bg.jpeg": "/token-builder/static/media/bg.01897d83bd9d0955a6e9.jpeg",
     "static/media/logo.svg": "/token-builder/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/token-builder/index.html",
     "main.7ebd623b.css.map": "/token-builder/static/css/main.7ebd623b.css.map",
-    "main.f5b5c2b0.js.map": "/token-builder/static/js/main.f5b5c2b0.js.map",
+    "main.5bfdbdd7.js.map": "/token-builder/static/js/main.5bfdbdd7.js.map",
     "787.bb5e657f.chunk.js.map": "/token-builder/static/js/787.bb5e657f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.7ebd623b.css",
-    "static/js/main.f5b5c2b0.js"
+    "static/js/main.5bfdbdd7.js"
   ]
 }
