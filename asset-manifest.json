@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/token-builder/static/css/main.7ebd623b.css",
-    "main.js": "/token-builder/static/js/main.c722f6f9.js",
+    "main.css": "/token-builder/static/css/main.14e189cb.css",
+    "main.js": "/token-builder/static/js/main.784de023.js",
     "static/js/787.bb5e657f.chunk.js": "/token-builder/static/js/787.bb5e657f.chunk.js",
     "static/media/bg.jpeg": "/token-builder/static/media/bg.01897d83bd9d0955a6e9.jpeg",
     "static/media/logo.svg": "/token-builder/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/token-builder/index.html",
-    "main.7ebd623b.css.map": "/token-builder/static/css/main.7ebd623b.css.map",
-    "main.c722f6f9.js.map": "/token-builder/static/js/main.c722f6f9.js.map",
+    "main.14e189cb.css.map": "/token-builder/static/css/main.14e189cb.css.map",
+    "main.784de023.js.map": "/token-builder/static/js/main.784de023.js.map",
     "787.bb5e657f.chunk.js.map": "/token-builder/static/js/787.bb5e657f.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.7ebd623b.css",
-    "static/js/main.c722f6f9.js"
+    "static/css/main.14e189cb.css",
+    "static/js/main.784de023.js"
   ]
 }
