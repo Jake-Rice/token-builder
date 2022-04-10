@@ -6,43 +6,46 @@ import Dashboard from './Dashboard'
 import abi from './abi'
 
 const DashboardCard = (props) => {
-
-    useEffect(() => {
-        if (props.tokenAddress!=='') {
-            handleSubmit(props.tokenAddress);
-        }
-    }, []);
+    const [tokenData, setTokenData] = useState({
+        accountAddress: '',
+        balance: '',
+        name: '',
+        symbol: '',
+        decimals: ''
+    });
 
     const handleSubmit = async (addr) => {
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-            await provider.send("eth_requestAccounts", []);
-            const signer = provider.getSigner();
-            const erc20 = new ethers.Contract(addr, abi, signer);
-
-            const pUser = signer.getAddress();
+            const erc20 = new ethers.Contract(addr, abi, props.web3.signer)
+            const pUser = props.web3.signer.getAddress();
             const pName = erc20.name();
             const pSymbol = erc20.symbol();
             const pDecimals = erc20.decimals();
             const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
             const balance = await erc20.balanceOf(user);
-            props.setTokenAddress(addr);
-            props.setTokenData({
+            props.updateContract(erc20);
+            setTokenData({
                 accountAddress: user,
                 balance: balance.toString(),
                 name: name,
                 symbol: symbol,
                 decimals: decimals
             });
+            props.setTokenAddress(addr);
         } catch (e) { 
             console.error(e);
             alert('Error: Token address invalid.');
         }
     }
 
+    const updateTokenData = (data) => {
+        setTokenData(data);
+        console.log(data);
+    }
+
     return (
         <Card>
-            {(props.tokenAddress==='') ? <TokenEntry submit={handleSubmit}/> : <Dashboard tokenAddress={props.tokenAddress} tokenData={props.tokenData} setTokenData={props.setTokenData} reset={props.reset}/>}
+            {(props.tokenAddress==='') ? <TokenEntry submit={handleSubmit}/> : <Dashboard web3={props.web3} tokenAddress={props.tokenAddress} tokenData={tokenData} updateTokenData={updateTokenData} reset={props.reset}/>}
         </Card>
     )
 }

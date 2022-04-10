@@ -9,7 +9,6 @@ import abi from './abi'
 const rxAddress = /^0x[a-fA-F0-9]{40}$/;
 
 const Dashboard = (props) => {
-
     const [transferRecipient, setTransferRecipient] = useState('');
     const [transferAmount, setTransferAmount] = useState('');
 
@@ -25,45 +24,10 @@ const Dashboard = (props) => {
     const [sendAddress, setSendAddress] = useState('');
 
     useEffect(async () => {
-        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
-        const filter = erc20.filters.Transfer(signer.address);
-        erc20.on(filter, async (from, to, amount, event) => {
-            props.setTokenData({...props.tokenData, balance: await erc20.balanceOf(props.tokenData.accountAddress)});
-        });
-        provider.provider.on("accountsChanged", async () => {
-            const signer = provider.getSigner();
-            const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
-            const pUser = signer.getAddress();
-            const pName = erc20.name();
-            const pSymbol = erc20.symbol();
-            const pDecimals = erc20.decimals();
-            const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
-            const balance = await erc20.balanceOf(user);
-            props.setTokenData({
-                accountAddress: user,
-                balance: balance.toString(),
-                name: name,
-                symbol: symbol,
-                decimals: decimals
-            });
-        });
-        return (()=>{
-            erc20.removeAllListeners();
-        });
-    }, []);
-
-    useEffect(async () => {
         if (rxAddress.test(claimOwner)) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-            await provider.send("eth_requestAccounts", []);
-            const signer = provider.getSigner();
-            const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
-            const decimals = await erc20.decimals();
+            const decimals = await props.web3.contract.decimals();
             try {
-                const _allowance = await erc20.allowance(claimOwner, await signer.getAddress());
+                const _allowance = await props.web3.contract.allowance(claimOwner, await props.web3.signer.getAddress());
                 setAllowanceAvailable(formatBalance(_allowance.toString(), decimals));
                 setValidAllowance(true);
             } catch(err) {
@@ -73,17 +37,50 @@ const Dashboard = (props) => {
         else setValidAllowance(false);
     }, [claimOwner]);
 
+    useEffect(async () => {
+        // transfer()
+        const filter = props.web3.contract.filters.Transfer(props.tokenData.accountAddress);
+        props.web3.contract.on(filter, async (from, to, amount, event) => {
+            const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
+            props.updateTokenData({...props.tokenData, balance: bal.toString()});
+        });
+        // transferFrom()
+        const filter2 = props.web3.contract.filters.Transfer(null, props.tokenData.accountAddress);
+        props.web3.contract.on(filter2, async (from, to, amount, event) => {
+            const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
+            const dec = await props.web3.contract.decimals();
+            props.updateTokenData({...props.tokenData, balance: bal.toString()});
+            const _allowance = await props.web3.contract.allowance(from, to);
+            setAllowanceAvailable(formatBalance(_allowance.toString(), dec));
+        });
+        return (()=>{
+            props.web3.contract.removeAllListeners();
+        });
+    }, [props.tokenData.accountAddress]);
+
+    useEffect(async () => {
+        props.web3.provider.provider.on("accountsChanged", async () => {
+            const signer = props.web3.provider.getSigner();
+            const pUser = signer.getAddress();
+            const pName = props.web3.contract.name();
+            const pSymbol = props.web3.contract.symbol();
+            const pDecimals = props.web3.contract.decimals();
+            const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
+            const balance = await props.web3.contract.balanceOf(user);
+            props.updateTokenData({
+                accountAddress: user,
+                balance: balance.toString(),
+                name: name,
+                symbol: symbol,
+                decimals: decimals
+            });
+        });
+    }, []);
+
     const transferTokens = async (recipient, amount) => {
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-            await provider.send("eth_requestAccounts", []);
-            const signer = provider.getSigner();
-            const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
-            const sender = await signer.getAddress();
-            const balance = await erc20.balanceOf(sender);
-            const decimals = await erc20.decimals();
-            const success = await erc20.transfer(recipient, parseAmount(amount, decimals));
-            console.log(success);
+            const decimals = await props.web3.contract.decimals();
+            await props.web3.contract.transfer(recipient, parseAmount(amount, decimals));
         } catch (e) { 
             console.error(e);
             alert('Error: Transfer failed.');
@@ -92,19 +89,13 @@ const Dashboard = (props) => {
 
     const setTokenAllowance = async (recipient, amount) => {
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-            await provider.send("eth_requestAccounts", []);
-            const signer = provider.getSigner();
-            const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
-            const sender = await signer.getAddress();
-            const balance = await erc20.balanceOf(sender);
-            const decimals = await erc20.decimals();
-            let success = false;
-            if (balance.gte(parseAmount(amount, decimals))) {
-                success = await erc20.approve(recipient, parseAmount(amount, decimals));
+            const sender = await props.web3.signer.getAddress();
+            const balance = await props.web3.contract.balanceOf(sender);
+            const decimals = await props.web3.contract.decimals();
+            if (balance >= formatBalance(amount, decimals)) {
+                await props.web3.contract.approve(recipient, parseAmount(amount, decimals));
             }
             else alert("Error: Insufficient balance.")
-            const allowance = await erc20.allowance(sender, recipient);
         } catch (e) { 
             console.error(e);
             alert('Error: Allowance failed.');
@@ -113,19 +104,11 @@ const Dashboard = (props) => {
 
     const transferAllowance = async (owner, recipient, amount) => {
         try {
-            const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-            await provider.send("eth_requestAccounts", []);
-            const signer = provider.getSigner();
-            const erc20 = new ethers.Contract(props.tokenAddress, abi, signer);
-            const spender = await signer.getAddress();
-            const balance = await erc20.balanceOf(owner);
-            const allowance = await erc20.allowance(owner, spender)
-            const decimals = await erc20.decimals();
-            let success = false;
-            if (balance >= parseAmount(amount, decimals) ) {
-                success = await erc20.transferFrom(owner, recipient, parseAmount(amount, decimals));
+            const balance = await props.web3.contract.balanceOf(owner);
+            const decimals = await props.web3.contract.decimals();
+            if (balance >= formatBalance(amount, decimals) ) {
+                await props.web3.contract.transferFrom(owner, recipient, parseAmount(amount, decimals));
             }
-            console.log(success);
         } catch (e) { 
             console.error(e);
             alert('Error: Transfer failed.');
@@ -186,16 +169,16 @@ const Dashboard = (props) => {
             <div className="form-row">
                 <label>Owner</label>
                 <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
-                {validAllowance && <><label>Available Allowance: {allowanceAvailable.toString()} {props.tokenData.symbol}</label><br/></>}
+                {validAllowance && <div><label>Available Allowance: {allowanceAvailable} {props.tokenData.symbol}</label><br/></div>}
                 <label>Amount</label>
                 <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/>
                 <Button size="sm" variant="danger" onClick={() => transferAllowance(claimOwner, (sendAllowance ? sendAddress : props.tokenData.accountAddress), claimAmount)}>{sendAllowance ? "Send Allowance" : "Claim Allowance"}</Button>
-                <label><input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/> Send to another address</label>
-                {sendAllowance &&
+                {/*<label><input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/> Send to another address</label>*/}
+                {/*sendAllowance &&
                     <div>
                         <label>Destination address</label>
                         <input className="text-input" value={sendAddress} onChange={(event)=>setSendAddress(event.target.value)}/>
-                    </div>}
+                    </div>*/}
             </div>
             <div className="form-row btn-row">
                 <Link to="/token-builder/dashboard">
