@@ -11,7 +11,7 @@ api.use(cors()) // Use this after the variable declaration
 api.use(express.urlencoded({extended: true})); //Parse URL-encoded bodies
 api.use(express.json());
 
-api.post('/', (req, res) => {
+api.post('/api', (req, res) => {
   const folderId = req.body.address;
   const name = req.body.name;
   const contractName = parseFileName(name);
