@@ -49,7 +49,7 @@ api.post('/api', (req, res) => {
       outputSelection:
       {
         '*':{
-          '*':['*']``
+          '*':['*']
         }
       }
     }
