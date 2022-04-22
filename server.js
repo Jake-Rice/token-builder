@@ -1,15 +1,21 @@
 const express = require('express');
+const path = require('path');
 const solc = require('solc');
 const fs = require('fs-extra');
 const cors = require('cors');
 const erc20Template = require('./templates/ERC20');
 const api = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 api.use(cors()) // Use this after the variable declaration
 
 api.use(express.urlencoded({extended: true})); //Parse URL-encoded bodies
 api.use(express.json());
+
+api.use(express.static(path.join(__dirname, 'client/build')));
+api.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
+})
 
 api.post('/api', (req, res) => {
   const folderId = req.body.address;
