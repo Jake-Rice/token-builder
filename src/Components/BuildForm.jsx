@@ -10,7 +10,8 @@ const BuildForm = (props) => {
   const [supply, setSupply] = useState('');
   const [decimals, setDecimals] = useState('');
   
-  const submit = () => {
+  const submit = (event) => {
+    event.preventDefault();
     props.onSubmit(name, symbol, parseAmount(supply, decimals), decimals);
   }
 
@@ -35,7 +36,7 @@ const BuildForm = (props) => {
         <div className="form-row"><label>Symbol</label><input type="text" className="text-input" value={symbol} onChange={(e)=>setSymbol(e.target.value)}/></div>
         <div className="form-row"><label>Initial Supply</label><input type="number" className="text-input" value={supply} onChange={(e)=>setSupply(e.target.value)}/></div>
         <div className="form-row"><label># of Decimal Places</label><input type="number" className="text-input" value={decimals} onChange={(e)=>setDecimals(e.target.value)}/></div>
-        <div className="form-row btn-row"><Button variant="primary" onClick={() => submit()}>Create Token</Button></div>
+        <div className="form-row btn-row"><Button variant="primary" onClick={submit}>Create Token</Button></div>
         {props.inProgress && <div>Please Wait: Token Creation In Progress...</div>}
       </Form>
     </Card>
