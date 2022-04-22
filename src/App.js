@@ -49,7 +49,7 @@ function App() {
           contract: contract
         });
         toggleInProgress(false);
-        navigate("/token-builder/dashboard");
+        navigate("/dashboard");
       } catch (e) {
         toggleInProgress(false);
         setTimeout(() => alert("Error: token not created\n"+ e.message), 100);
@@ -77,14 +77,14 @@ function App() {
     <div className="App">
       <h1>Token Builder</h1>
       <h2>Build your own ERC20 token on the Ethereum (Rinkeby) blockchain!</h2>
-      <Link to="/token-builder/build"><Button variant="primary">Create A Token</Button></Link>
-      <Link to="/token-builder/dashboard"><Button variant="secondary">Token Dashboard</Button></Link>
+      <Link to="/build"><Button variant="primary">Create A Token</Button></Link>
+      <Link to="/dashboard"><Button variant="secondary">Token Dashboard</Button></Link>
       <div className="card-container">
         <Routes>
           <Route path="/" element={<></>}/>
-          <Route path="/token-builder/" element={<></>}/>
-          <Route path="/token-builder/build" element={<BuildForm onSubmit={handleSubmit} inProgress={inProgress}/>}/>
-          <Route path="/token-builder/dashboard" element={web3.signer ? <DashboardCard web3={web3} tokenAddress={tokenAddress} setTokenAddress={setTokenAddress} updateContract={handleUpdateContract} reset={handleReset}/> : <></>}/>
+          <Route path="/" element={<></>}/>
+          <Route path="/build" element={<BuildForm onSubmit={handleSubmit} inProgress={inProgress}/>}/>
+          <Route path="/dashboard" element={web3.signer ? <DashboardCard web3={web3} tokenAddress={tokenAddress} setTokenAddress={setTokenAddress} updateContract={handleUpdateContract} reset={handleReset}/> : <></>}/>
         </Routes>
         <div className="instructions-container card card-info">
           <h3 className="instructions-section-header">Creating A Token</h3>
