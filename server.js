@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const cors = require('cors');
 const erc20Template = require('./templates/ERC20');
 const api = express();
-const port = /*process.env.PORT || */3001;
+const port = process.env.PORT || 3001;
 
 api.use(cors()) // Use this after the variable declaration
 
@@ -43,7 +43,7 @@ api.post('/', (req, res) => {
       outputSelection:
       {
         '*':{
-          '*':['*']
+          '*':['*']``
         }
       }
     }
