@@ -22,14 +22,14 @@ api.post('/api', (req, res) => {
   const name = req.body.name;
   const contractName = parseFileName(name);
   const filename = contractName+'.sol';
-  fs.mkdirSync(path.join(__dirname, `/contracts/${folderId}`), (err) => {
+  fs.mkdirSync(`contracts/${folderId}`, (err) => {
     console.error(err);
   });
-  fs.writeFileSync(path.join(__dirname, `/contracts/${folderId}/${filename}`), erc20Template.code(contractName), (err) => {
+  fs.writeFileSync(`contracts/${folderId}/${filename}`, erc20Template.code(contractName), (err) => {
     console.error(err);
   });
 
-  const source = fs.readFileSync(path.join(__dirname, `/contracts/${folderId}/${filename}`), 'utf-8');
+  const source = fs.readFileSync(`contracts/${folderId}/${filename}`, 'utf-8');
   
   const compilerInput = {
     language: 'Solidity',
@@ -60,7 +60,7 @@ api.post('/api', (req, res) => {
     compilation = solc.compile(JSON.stringify(compilerInput), {import: 
       path => {
         try {
-          return { contents: fs.readFileSync(path.join(__dirname,`/node_modules/${path}`), 'utf-8') };
+          return { contents: fs.readFileSync(`node_modules/${path}`, 'utf-8') };``
         } catch (err) {
           return { error: 'File not found' };
         }
@@ -73,7 +73,7 @@ api.post('/api', (req, res) => {
 
   const output = JSON.parse(compilation);
 
-  fs.removeSync(path.join(__dirname,`/contracts/${folderId}`), (err) =>{ console.error(err)});
+  fs.removeSync(`contracts/${folderId}`, (err) =>{ console.error(err)});
   
   const abi = output.contracts[filename][contractName].abi;
   const bytecode = output.contracts[filename][contractName].evm.bytecode.object;
