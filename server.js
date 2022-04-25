@@ -68,10 +68,11 @@ api.post('/api', (req, res) => {
     })
   }
   catch(err) {
-    console.error(err);
+    console.log(err);
   }
 
   const output = JSON.parse(compilation);
+  console.log(output)
 
   fs.removeSync(`contracts/${folderId}`, (err) =>{ console.error(err)});
   
