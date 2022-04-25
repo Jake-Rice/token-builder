@@ -22,7 +22,7 @@ api.post('/api', (req, res) => {
   const name = req.body.name;
   const contractName = parseFileName(name);
   const filename = contractName+'.sol';
-  fs.mkdirSync(`./contracts/${folderId}`, (err) => {
+  fs.mkdirSync(`contracts/${folderId}`, (err) => {
     console.error(err);
   });
   fs.writeFileSync(`contracts/${folderId}/${filename}`, erc20Template.code(contractName), (err) => {
