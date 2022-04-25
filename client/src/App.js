@@ -40,7 +40,7 @@ function App() {
         
         const contract = await deploy(res.data.abi, res.data.bytecode, name, symbol, supply, decimals);
         const tx = contract.deployTransaction;
-        console.log(contract.address);``
+        console.log(contract.address);
         setTokenAddress(contract.address);
         const rx = await tx.wait();
         console.log(rx);
