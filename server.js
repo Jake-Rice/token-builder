@@ -60,7 +60,7 @@ api.post('/api', (req, res) => {
     compilation = solc.compile(JSON.stringify(compilerInput), {import: 
       path => {
         try {
-          return { contents: fs.readFileSync(`node_modules/${path}`, 'utf-8') };``
+          return { contents: fs.readFileSync(`node_modules/${path}`, 'utf-8') };
         } catch (err) {
           return { error: 'File not found' };
         }
