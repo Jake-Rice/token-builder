@@ -22,9 +22,14 @@ api.post('/api', (req, res) => {
   const name = req.body.name;
   const contractName = parseFileName(name);
   const filename = contractName+'.sol';
-  fs.mkdirSync(`contracts/${folderId}`, (err) => {
-    console.error(err);
-  });
+  if (!fs.existsSync(`contracts/${folderId}`)) {
+    fs.mkdirSync(`contracts/${folderId}`, (err) => {
+      console.error(err);
+    });
+  }
+  if (fs.existsSync(`contracts/${folderId}/${filename}`)) {
+    fs.unlinkSync(`contracts/${folderId}/${filename}`);
+  }
   fs.writeFileSync(`contracts/${folderId}/${filename}`, erc20Template.code(contractName), (err) => {
     console.error(err);
   });
@@ -74,7 +79,6 @@ api.post('/api', (req, res) => {
   }
 
   const output = JSON.parse(compilation);
-  console.log(output)
 
   fs.removeSync(`contracts/${folderId}`, (err) =>{ console.error(err)});
   

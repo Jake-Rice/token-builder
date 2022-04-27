@@ -22,20 +22,20 @@ body {
   width: 100vw;
 }
 
-h1 {
+.page-header {
   font-size: 28pt;
   padding-top: 20px;
   padding-bottom: 20px;
 }
 
-h2 {
+.page-sub-header {
   font-size: 18pt;
   padding-bottom: 20px;
 }
 
 .card {
-  border-radius: 10px;
-  box-shadow: 0px 0px 15px 5px var(--color-primary-dark);
+  border-radius: 7px;
+  box-shadow: 0px 0px 10px 2px var(--color-primary-dark);
   margin: 25px 10px;
   padding: 1px;
   padding-top: 15px;
@@ -47,16 +47,8 @@ h2 {
   color: black;
 }
 
-.card-info {
-  background-color: var(--color-secondary-dark);
-  color: white;
-  flex-basis: 400px;
-  flex-shrink: 1;
-  flex-grow: 1;
-  max-width: 600px;
-}
 .card-info ol {
-  padding: 0 10px;
+  padding: 0;
   list-style-position: inside;
   text-align: left;
 }
@@ -75,4 +67,8 @@ li {
 .btn-primary, .btn-primary:hover, .btn-primary:focus {
   background-color: var(--color-secondary-dark);
   border-color: var(--color-primary-dark);
+}
+
+.modal {
+  color: black;
 }

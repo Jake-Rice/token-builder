@@ -11,6 +11,7 @@
 
 # production
 /client/build
+/contracts/heroku.txt
 
 # misc
 .DS_Store
