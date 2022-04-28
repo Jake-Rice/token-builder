@@ -82,7 +82,7 @@ api.post('/api', (req, res) => {
 
   const output = JSON.parse(compilation);
 
-  //fs.removeSync(`contracts/${folderId}`, (err) =>{ console.error(err)});
+  fs.removeSync(`contracts/${folderId}`, (err) =>{ console.error(err)});
   
   const abi = output.contracts[filename][contractName].abi;
   const bytecode = output.contracts[filename][contractName].evm.bytecode.object;
