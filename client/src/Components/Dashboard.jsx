@@ -78,6 +78,16 @@ const Dashboard = (props) => {
                         setAllowanceAvailable(formatBalance(_allowance.toString(), dec));
                     }
                 });
+                // pause()
+                const filter4 = props.web3.contract.filters.Paused();
+                props.web3.contract.on(filter4, async () => {
+                    props.updateTokenData({...props.tokenData, paused: true});
+                });
+                // unpause()
+                const filter5 = props.web3.contract.filters.Unpaused();
+                props.web3.contract.on(filter5, async () => {
+                    props.updateTokenData({...props.tokenData, paused: false});
+                });
             }
         }
         run();
@@ -92,14 +102,16 @@ const Dashboard = (props) => {
         const pName = erc20.name();
         const pSymbol = erc20.symbol();
         const pDecimals = erc20.decimals();
-        const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
+        const pPaused = erc20.paused();
+        const [user, name, symbol, decimals, paused] = await Promise.all([pUser, pName, pSymbol, pDecimals, pPaused]);
         const balance = await erc20.balanceOf(user);
         props.updateTokenData({
             accountAddress: user,
             balance: balance.toString(),
             name: name,
             symbol: symbol,
-            decimals: decimals
+            decimals: decimals,
+            paused: paused
         });
         props.web3.provider.provider.on("accountsChanged", async () => {
             const signer = props.web3.provider.getSigner();
@@ -107,14 +119,16 @@ const Dashboard = (props) => {
             const pName = props.web3.contract.name();
             const pSymbol = props.web3.contract.symbol();
             const pDecimals = props.web3.contract.decimals();
-            const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
+            const pPaused = erc20.paused();
+            const [user, name, symbol, decimals, paused] = await Promise.all([pUser, pName, pSymbol, pDecimals, pPaused]);
             const balance = await props.web3.contract.balanceOf(user);
             props.updateTokenData({
                 accountAddress: user,
                 balance: balance.toString(),
                 name: name,
                 symbol: symbol,
-                decimals: decimals
+                decimals: decimals,
+                paused: paused
             });
         });
     }, []);
@@ -157,6 +171,24 @@ const Dashboard = (props) => {
         }
     }
 
+    const pauseTransactions = async () => {
+        try {
+            await props.web3.contract.pause();
+        } catch(err) {
+            console.error(err);
+            alert('Error: Pause failed.')
+        }
+    }
+
+    const unPauseTransactions = async () => {
+        try {
+            await props.web3.contract.unpause();
+        } catch(err) {
+            console.error(err);
+            alert('Error: Unpause failed.')
+        }
+    }
+
     const formatBalance = (balance, dec) => {
         if (dec === 0) return balance;
         let bal = balance;
@@ -188,9 +220,10 @@ const Dashboard = (props) => {
             <div className="form-row"><label>Token Symbol: {props.tokenData.symbol}</label></div>
             <div className="form-row"><label>Account Address: {props.tokenData.accountAddress}</label></div>
             <div className="form-row"><label>Token Balance: {formatBalance(props.tokenData.balance.toString(), props.tokenData.decimals)} {props.tokenData.symbol}</label></div>
+            <div className="form-row"><label>Transfers Paused: {props.tokenData.paused ? "Yes" : "No"}</label></div>
             <hr/>
             <h3>Transfer Tokens</h3>
-            <div className="form-row">
+            <div className="form-row field-row">
                 <label>Recipient</label>
                 <input className="text-input" value={transferRecipient} onChange={(event)=>setTransferRecipient(event.target.value)}/><br/>
                 <label>Amount</label>
@@ -199,7 +232,7 @@ const Dashboard = (props) => {
             </div>
             <hr/>
             <h3>Set Token Allowance</h3>
-            <div className="form-row">
+            <div className="form-row field-row">
                 <label>Spender</label>
                 <input className="text-input" value={allowanceSpender} onChange={(event)=>setAllowanceSpender(event.target.value)}/><br/>
                 <label>Amount</label>
@@ -208,7 +241,7 @@ const Dashboard = (props) => {
             </div>
             <hr/>
             <h3>Claim Allowance</h3>
-            <div className="form-row">
+            <div className="form-row field-row">
                 <label>Owner</label>
                 <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
                 {validAllowance && <div><label>Available Allowance: {allowanceAvailable} {props.tokenData.symbol}</label><br/></div>}
@@ -222,8 +255,14 @@ const Dashboard = (props) => {
                         <input className="text-input" value={sendAddress} onChange={(event)=>setSendAddress(event.target.value)}/>
                     </div>*/}
             </div>
+            <hr/>
+        <h3>{props.tokenData.paused ? "Unpause" : "Pause"} Token Transfers</h3>
+            <div className="form-row field-row">
+                {props.tokenData.paused ? <Button size="sm" variant="danger" onClick={() => unPauseTransactions()}>Unpause</Button> :
+                <Button size="sm" variant="danger" onClick={() => {pauseTransactions()}}>Pause</Button>}
+            </div>
             <div className="form-row btn-row">
-                <Link to="/token-builder/dashboard">
+                <Link to="/dashboard">
                     <Button variant="secondary" onClick={props.reset}>Use a Different Token</Button>
                 </Link>
             </div>

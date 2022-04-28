@@ -11,7 +11,8 @@ const DashboardCard = (props) => {
         balance: '',
         name: '',
         symbol: '',
-        decimals: ''
+        decimals: '',
+        paused: false
     });
 
     const handleSubmit = async (addr) => {
@@ -22,14 +23,16 @@ const DashboardCard = (props) => {
             const pName = erc20.name();
             const pSymbol = erc20.symbol();
             const pDecimals = erc20.decimals();
-            const [user, name, symbol, decimals] = await Promise.all([pUser, pName, pSymbol, pDecimals]);
+            const pPaused = erc20.paused();
+            const [user, name, symbol, decimals, paused] = await Promise.all([pUser, pName, pSymbol, pDecimals, pPaused]);
             const balance = await erc20.balanceOf(user);
             setTokenData({
                 accountAddress: user,
                 balance: balance.toString(),
                 name: name,
                 symbol: symbol,
-                decimals: decimals
+                decimals: decimals,
+                paused: paused
             });
             props.setTokenAddress(addr);
         } catch (e) { 

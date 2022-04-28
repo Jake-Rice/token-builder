@@ -28,16 +28,17 @@ function App() {
     });
   }, []);
 
-  const handleSubmit = async (name, symbol, supply, decimals) => {
+  const handleSubmit = async (name, symbol, supply, decimals, pausable) => {
     if (!inProgress) {
       try {
         toggleInProgress(true);
 
         const address = await web3.signer.getAddress();
         
-        const res = await axios.post("https://jake-rice-token-builder.herokuapp.com/api"/*"http://localhost:3000/api"*/, {
+        const res = await axios.post(/*"https://jake-rice-token-builder.herokuapp.com/api"*/"http://localhost:3000/api", {
           address: address,
-          name: name
+          name: name,
+          pausable: pausable
         });
         
         const contract = await deploy(res.data.abi, res.data.bytecode, name, symbol, supply, decimals);

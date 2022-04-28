@@ -18,6 +18,8 @@ api.get('*', (req, res) => {
 })
 
 api.post('/api', (req, res) => {
+  const contractCode = erc20Template.code(req.body.name, req.body.pausable);
+  console.log(contractCode);
   const folderId = req.body.address;
   const name = req.body.name;
   const contractName = parseFileName(name);
@@ -30,7 +32,7 @@ api.post('/api', (req, res) => {
   if (fs.existsSync(`contracts/${folderId}/${filename}`)) {
     fs.unlinkSync(`contracts/${folderId}/${filename}`);
   }
-  fs.writeFileSync(`contracts/${folderId}/${filename}`, erc20Template.code(contractName), (err) => {
+  fs.writeFileSync(`contracts/${folderId}/${filename}`, contractCode, (err) => {
     console.error(err);
   });
 
@@ -80,7 +82,7 @@ api.post('/api', (req, res) => {
 
   const output = JSON.parse(compilation);
 
-  fs.removeSync(`contracts/${folderId}`, (err) =>{ console.error(err)});
+  //fs.removeSync(`contracts/${folderId}`, (err) =>{ console.error(err)});
   
   const abi = output.contracts[filename][contractName].abi;
   const bytecode = output.contracts[filename][contractName].evm.bytecode.object;

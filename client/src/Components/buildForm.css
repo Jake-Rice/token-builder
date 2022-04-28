@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 .form-row {
     text-align: left;
     margin: 15px 2%;
@@ -14,5 +18,19 @@
 
 .btn-row {
     text-align: center;
+}
+
+.cb-row {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.cb-row label {
+    width: fit-content;
+}
+
+.cb-row input {
+    margin-left: 10px;
 }
   

@@ -11,10 +11,12 @@ const BuildForm = (props) => {
   const [symbol, setSymbol] = useState('');
   const [supply, setSupply] = useState('');
   const [decimals, setDecimals] = useState('');
+
+  const [pausable, setPausable] = useState(false);
   
   const submit = (event) => {
     event.preventDefault();
-    props.onSubmit(name, symbol, parseAmount(supply, decimals), decimals);
+    props.onSubmit(name, symbol, parseAmount(supply, decimals), decimals, pausable);
   }
 
   const parseAmount = (amt, dec) => {
@@ -49,10 +51,11 @@ const BuildForm = (props) => {
     <Card className="card card-app">
       <Form>
         <h3>Create A Token</h3>
-        <div className="form-row"><label>Name</label><input type="text" className="text-input" maxLength={MAX_STRING_LENGTH} value={name} onChange={(e)=>setName(e.target.value)}/></div>
-        <div className="form-row"><label>Symbol</label><input type="text" className="text-input" maxLength={MAX_STRING_LENGTH} value={symbol} onChange={(e)=>setSymbol(e.target.value)}/></div>
-        <div className="form-row"><label>Initial Supply</label><input type="text" inputMode="numeric" className="text-input" value={supply} onChange={enterSupply}/></div>
-        <div className="form-row"><label># of Decimal Places</label><input type="text" inputMode="numeric" className="text-input" value={decimals} onChange={enterDecimals}/></div>
+        <div className="form-row field-row"><label>Name</label><input type="text" className="text-input" maxLength={MAX_STRING_LENGTH} value={name} onChange={(e)=>setName(e.target.value)}/></div>
+        <div className="form-row field-row"><label>Symbol</label><input type="text" className="text-input" maxLength={MAX_STRING_LENGTH} value={symbol} onChange={(e)=>setSymbol(e.target.value)}/></div>
+        <div className="form-row field-row"><label>Initial Supply</label><input type="text" inputMode="numeric" className="text-input" value={supply} onChange={enterSupply}/></div>
+        <div className="form-row field-row"><label># of Decimal Places</label><input type="text" inputMode="numeric" className="text-input" value={decimals} onChange={enterDecimals}/></div>
+        <div className="form-row cb-row"><label>Pausable</label><input type="checkbox" className="cb-input" checked={pausable} onChange={()=>setPausable(!pausable)}/></div>
         <div className="form-row btn-row"><Button variant="primary" onClick={submit}>Create Token</Button></div>
         {props.inProgress && <div>Please Wait: Token Creation In Progress...</div>}
       </Form>
