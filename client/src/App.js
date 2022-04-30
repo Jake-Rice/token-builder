@@ -9,6 +9,7 @@ import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
+import abi from './Components/abi';
 
 function App() {
   const [web3, setWeb3] = useState({
@@ -18,24 +19,40 @@ function App() {
   const [inProgress, toggleInProgress] = useState(false);
   const [showModal, toggleModal] = useState(false);
 
-  useEffect(async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    setWeb3({
-      provider: provider,
-      signer: signer
-    });
+  useEffect(() => {
+    const run = async () => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      setWeb3({
+        provider: provider,
+        signer: signer
+      });
+    }
+    run();
   }, []);
 
-  const handleSubmit = async (name, symbol, supply, decimals, pausable) => {
+  useEffect(() => {
+    if (web3.provider) {
+      web3.provider.provider.on("accountsChanged", async () => {
+        setWeb3({ ...web3, signer: web3.provider.getSigner() });
+      });
+    }
+    return (() => {
+      if (web3.provider) {
+        web3.provider.provider.removeAllListeners();
+      }
+    })
+  }, [web3])
+
+  const handleBuild = async (name, symbol, supply, decimals, pausable) => {
     if (!inProgress) {
       try {
         toggleInProgress(true);
 
         const address = await web3.signer.getAddress();
         
-        const res = await axios.post("https://jake-rice-token-builder.herokuapp.com/api"/*"http://localhost:3000/api"*/, {
+        const res = await axios.post(/*"https://jake-rice-token-builder.herokuapp.com/api"*/"http://localhost:3000/api", {
           address: address,
           name: name,
           pausable: pausable
@@ -43,7 +60,6 @@ function App() {
         
         const contract = await deploy(res.data.abi, res.data.bytecode, name, symbol, supply, decimals);
         const tx = contract.deployTransaction;
-        console.log("Contract Deployed to: " + contract.address);
         setTokenAddress(contract.address);
         const rx = await tx.wait();
         setWeb3({
@@ -68,15 +84,30 @@ function App() {
   const navigate = useNavigate();
 
   const handleReset = () => {
-    setTokenAddress('');
+    setWeb3({
+      ...web3,
+      contract: null
+    });
   }
 
-  const handleUpdateContract = (contract) => {
+  const handleUpdateContract = (addr) => {
+    if (web3.contract) web3.contract.removeAllListeners();
+    const contract = new ethers.Contract(addr, abi, web3.signer);
     setWeb3({...web3, contract: contract});
   }
 
   const showHelpModal = () => {
     toggleModal(true);
+  }
+
+  const formatBalance = (balance, dec) => {
+    if (dec === 0) return balance;
+    let bal = balance;
+    while (bal.length <= dec) bal = '0'+bal;
+    bal = bal.slice(0,0-dec)+'.'+bal.slice(0-dec);
+    while (bal[bal.length-1] === '0') bal = bal.slice(0,-1);
+    if (bal[bal.length-1] === '.') bal = bal.slice(0,-1);
+    return bal;
   }
 
   return (
@@ -90,8 +121,8 @@ function App() {
         <Routes>
           <Route path="/" element={<></>}/>
           <Route path="/" element={<></>}/>
-          <Route path="/build" element={<BuildForm onSubmit={handleSubmit} inProgress={inProgress}/>}/>
-          <Route path="/dashboard" element={web3.signer ? <DashboardCard web3={web3} tokenAddress={tokenAddress} setTokenAddress={setTokenAddress} updateContract={handleUpdateContract} reset={handleReset}/> : <></>}/>
+          <Route path="/build" element={web3.signer ? <BuildForm onSubmit={handleBuild} inProgress={inProgress}/> : <></>}/>
+          <Route path="/dashboard" element={web3.signer ? <DashboardCard web3={web3} updateContract={handleUpdateContract} reset={handleReset}/> : <></>}/>
         </Routes>
       </div>
       <HelpModal showModal={showModal} toggleModal={toggleModal}/>

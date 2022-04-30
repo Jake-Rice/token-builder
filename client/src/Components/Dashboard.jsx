@@ -9,6 +9,7 @@ import abi from './abi'
 const rxAddress = /^0x[a-fA-F0-9]{40}$/;
 
 const Dashboard = (props) => {
+
     const [transferRecipient, setTransferRecipient] = useState('');
     const [transferAmount, setTransferAmount] = useState('');
 
@@ -23,11 +24,72 @@ const Dashboard = (props) => {
     const [sendAllowance, setSendAllowance] = useState(false);
     const [sendAddress, setSendAddress] = useState('');
 
-    useEffect(async () => {
+    const [tokenData, setTokenData] = useState({
+        address: '',
+        name: '',
+        symbol: '',
+        decimals: '',
+        paused: false
+    });
+
+    const [userData, setUserData] = useState({
+        address: '',
+        balance: ''
+    });
+
+    let filter1, filter2, filter3, filter4, filter5;
+
+    const getTokenData = async () => {
+        const address = props.web3.contract.address;
+        const pName = props.web3.contract.name();
+        const pSymbol = props.web3.contract.symbol();
+        const pDecimals = props.web3.contract.decimals();
+        const [name, symbol, decimals] = await Promise.all([pName, pSymbol, pDecimals]);
+        let paused;
+        try {
+            paused = await props.web3.contract.paused();
+        } catch (err) {
+            paused = false;
+        }
+        
+        setTokenData({
+            address: address,
+            name: name,
+            symbol: symbol,
+            decimals: decimals,
+            paused: paused
+        });
+    }
+    useEffect(() => {
+        if (props.web3.contract) getTokenData();
+        if (props.web3.signer) getUserData();
+    }, [props.web3.signer, props.web3.contract]);
+
+    const getUserData = async () => {
+        const address = await props.web3.signer.getAddress();
+        const balance = formatBalance((await props.web3.contract.balanceOf(address)).toString(), await props.web3.contract.decimals());
+        setUserData({
+            address: address,
+            balance: balance
+        })
+    }
+
+    const formatBalance = (balance, dec) => {
+        if (dec === 0) return balance;
+        let bal = balance;
+        while (bal.length <= dec) bal = '0'+bal;
+        bal = bal.slice(0,0-dec)+'.'+bal.slice(0-dec);
+        while (bal[bal.length-1] === '0') bal = bal.slice(0,-1);
+        if (bal[bal.length-1] === '.') bal = bal.slice(0,-1);
+        return bal;
+    }
+
+    //============== Allowance Display ===============
+    const updateAllowance = async () => {
         if (rxAddress.test(claimOwner)) {
             const decimals = await props.web3.contract.decimals();
             try {
-                const _allowance = await props.web3.contract.allowance(claimOwner, await props.web3.signer.getAddress());
+                const _allowance = await props.web3.contract.allowance(claimOwner, userData.address);
                 setAllowanceAvailable(formatBalance(_allowance.toString(), decimals));
                 setValidAllowance(true);
             } catch(err) {
@@ -35,103 +97,56 @@ const Dashboard = (props) => {
             }
         }
         else setValidAllowance(false);
-    }, [claimOwner]);
-
+    }
     useEffect(() => {
-        props.web3.contract.removeAllListeners();
-        return (()=>{
-            props.web3.contract.removeAllListeners();
-        });
-    }, []);
+        updateAllowance();
+    }, [claimOwner, userData.address]);
 
     useEffect(() => {
         const run = async () => {
-            if (props.tokenData.accountAddress) {
+            if (userData.address) {
                 //Change allowance display if visible
                 if (rxAddress.test(claimOwner)) {
                     const dec = await props.web3.contract.decimals();
-                    const _allowance = await props.web3.contract.allowance(claimOwner, props.tokenData.accountAddress);
+                    const _allowance = await props.web3.contract.allowance(claimOwner, userData.address);
                     setAllowanceAvailable(formatBalance(_allowance.toString(), dec));
                 }
-                // transfer()
-                const filter = props.web3.contract.filters.Transfer(props.tokenData.accountAddress);
-                props.web3.contract.on(filter, async (from, to, amount, event) => {
-                    const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
-                    props.updateTokenData({...props.tokenData, balance: bal.toString()});
-                });
-                // transferFrom()
-                const filter2 = props.web3.contract.filters.Transfer(null, props.tokenData.accountAddress);
-                props.web3.contract.on(filter2, async (from, to, amount, event) => {
-                    const bal = await props.web3.contract.balanceOf(props.tokenData.accountAddress);
-                    const dec = await props.web3.contract.decimals();
-                    props.updateTokenData({...props.tokenData, balance: bal.toString()});
-                    const _allowance = await props.web3.contract.allowance(from, to);
-                    setAllowanceAvailable(formatBalance(_allowance.toString(), dec));
-                });
-                // approve()
-                const filter3 = props.web3.contract.filters.Approval(null, props.tokenData.accountAddress);
-                props.web3.contract.on(filter3, async (from, to, amount, event) => {
-                    //TODO: run only if approving address == claimOwner
-                    if (from === claimOwner) {
-                        const dec = await props.web3.contract.decimals();
-                        const _allowance = await props.web3.contract.allowance(from, to);
-                        setAllowanceAvailable(formatBalance(_allowance.toString(), dec));
-                    }
-                });
-                // pause()
-                const filter4 = props.web3.contract.filters.Paused();
-                props.web3.contract.on(filter4, async () => {
-                    props.updateTokenData({...props.tokenData, paused: true});
-                });
-                // unpause()
-                const filter5 = props.web3.contract.filters.Unpaused();
-                props.web3.contract.on(filter5, async () => {
-                    props.updateTokenData({...props.tokenData, paused: false});
-                });
             }
         }
         run();
-        return (()=>{
-            props.web3.contract.removeAllListeners();
-        });
-    }, [props.tokenData.accountAddress]);
+    }, [userData.address, claimOwner]);
+    //============= /Allowance Display ===============
 
-    useEffect(async () => {
-        const erc20 = new ethers.Contract(props.tokenAddress, abi, props.web3.signer)
-        const pUser = props.web3.signer.getAddress();
-        const pName = erc20.name();
-        const pSymbol = erc20.symbol();
-        const pDecimals = erc20.decimals();
-        const pPaused = erc20.paused();
-        const [user, name, symbol, decimals, paused] = await Promise.all([pUser, pName, pSymbol, pDecimals, pPaused]);
-        const balance = await erc20.balanceOf(user);
-        props.updateTokenData({
-            accountAddress: user,
-            balance: balance.toString(),
-            name: name,
-            symbol: symbol,
-            decimals: decimals,
-            paused: paused
-        });
-        props.web3.provider.provider.on("accountsChanged", async () => {
-            const signer = props.web3.provider.getSigner();
-            const pUser = signer.getAddress();
-            const pName = props.web3.contract.name();
-            const pSymbol = props.web3.contract.symbol();
-            const pDecimals = props.web3.contract.decimals();
-            const pPaused = erc20.paused();
-            const [user, name, symbol, decimals, paused] = await Promise.all([pUser, pName, pSymbol, pDecimals, pPaused]);
-            const balance = await props.web3.contract.balanceOf(user);
-            props.updateTokenData({
-                accountAddress: user,
-                balance: balance.toString(),
-                name: name,
-                symbol: symbol,
-                decimals: decimals,
-                paused: paused
-            });
-        });
-    }, []);
+    useEffect(() => {
+        const run = async () => {
+            if (userData.address!=='') {
+                filter1 = props.web3.contract.filters.Transfer(userData.address);
+                props.web3.contract.on(filter1, update);
+                filter2 = props.web3.contract.filters.Transfer(null, userData.address);
+                props.web3.contract.on(filter2, update);
+                filter3 = props.web3.contract.filters.Approval(null, userData.address);
+                props.web3.contract.on(filter3, update);
+                filter4 = props.web3.contract.filters.Paused();
+                props.web3.contract.on(filter4, getTokenData);
+                filter5 = props.web3.contract.filters.Unpaused();
+                props.web3.contract.on(filter5, getTokenData);
+            }
+        }
+        run();
+        return (() => {
+            if (userData.address!=='' && props.web3.contract) {
+                props.web3.contract.off(filter1, update);
+                props.web3.contract.off(filter2, update);
+                props.web3.contract.off(filter3, update);
+                props.web3.contract.off(filter4, getTokenData);
+                props.web3.contract.off(filter5, getTokenData);
+            }
+        })
+    }, [userData.address]);
+    const update = () => {
+        getUserData();
+        updateAllowance();
+    }
 
     const transferTokens = async (recipient, amount) => {
         try {
@@ -189,16 +204,6 @@ const Dashboard = (props) => {
         }
     }
 
-    const formatBalance = (balance, dec) => {
-        if (dec === 0) return balance;
-        let bal = balance;
-        while (bal.length <= dec) bal = '0'+bal;
-        bal = bal.slice(0,0-dec)+'.'+bal.slice(0-dec);
-        while (bal[bal.length-1] === '0') bal = bal.slice(0,-1);
-        if (bal[bal.length-1] === '.') bal = bal.slice(0,-1);
-        return bal;
-    }
-
     const parseAmount = (amt, dec) => {
         let amount = amt;
         if (amount.indexOf('.') < 0) {
@@ -215,12 +220,12 @@ const Dashboard = (props) => {
     return (
         <Form>
             <h3>Token Dashboard</h3>
-            <div className="form-row"><label>Token Address: {props.tokenAddress}</label></div>
-            <div className="form-row"><label>Token Name: {props.tokenData.name}</label></div>
-            <div className="form-row"><label>Token Symbol: {props.tokenData.symbol}</label></div>
-            <div className="form-row"><label>Account Address: {props.tokenData.accountAddress}</label></div>
-            <div className="form-row"><label>Token Balance: {formatBalance(props.tokenData.balance.toString(), props.tokenData.decimals)} {props.tokenData.symbol}</label></div>
-            <div className="form-row"><label>Transfers Paused: {props.tokenData.paused ? "Yes" : "No"}</label></div>
+            <div className="form-row"><label>Token Address: {tokenData.address}</label></div>
+            <div className="form-row"><label>Token Name: {tokenData.name}</label></div>
+            <div className="form-row"><label>Token Symbol: {tokenData.symbol}</label></div>
+            <div className="form-row"><label>Account Address: {userData.address}</label></div>
+            <div className="form-row"><label>Token Balance: {userData.balance}</label></div>
+            <div className="form-row"><label>Transfers Paused: {tokenData.paused ? "Yes" : "No"}</label></div>
             <hr/>
             <h3>Transfer Tokens</h3>
             <div className="form-row field-row">
@@ -244,10 +249,10 @@ const Dashboard = (props) => {
             <div className="form-row field-row">
                 <label>Owner</label>
                 <input className="text-input" value={claimOwner} onChange={(event)=>setClaimOwner(event.target.value)}/><br/>
-                {validAllowance && <div><label>Available Allowance: {allowanceAvailable} {props.tokenData.symbol}</label><br/></div>}
+                {validAllowance && <div><label>Available Allowance: {allowanceAvailable} {tokenData.symbol}</label><br/></div>}
                 <label>Amount</label>
                 <input type="number" value={claimAmount} onChange={(event)=>setClaimAmount(event.target.value)}/>
-                <Button size="sm" variant="danger" onClick={() => transferAllowance(claimOwner, (sendAllowance ? sendAddress : props.tokenData.accountAddress), claimAmount)}>{sendAllowance ? "Send Allowance" : "Claim Allowance"}</Button>
+                <Button size="sm" variant="danger" onClick={() => transferAllowance(claimOwner, (sendAllowance ? sendAddress : userData.address), claimAmount)}>{sendAllowance ? "Send Allowance" : "Claim Allowance"}</Button>
                 {/*<label><input type="checkbox" checked={sendAllowance} onChange={()=>setSendAllowance(!sendAllowance)}/> Send to another address</label>*/}
                 {/*sendAllowance &&
                     <div>
@@ -256,9 +261,9 @@ const Dashboard = (props) => {
                     </div>*/}
             </div>
             <hr/>
-        <h3>{props.tokenData.paused ? "Unpause" : "Pause"} Token Transfers</h3>
+        <h3>{tokenData.paused ? "Unpause" : "Pause"} Token Transfers</h3>
             <div className="form-row field-row">
-                {props.tokenData.paused ? <Button size="sm" variant="danger" onClick={() => unPauseTransactions()}>Unpause</Button> :
+                {tokenData.paused ? <Button size="sm" variant="danger" onClick={() => unPauseTransactions()}>Unpause</Button> :
                 <Button size="sm" variant="danger" onClick={() => {pauseTransactions()}}>Pause</Button>}
             </div>
             <div className="form-row btn-row">
