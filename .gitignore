@@ -12,7 +12,7 @@
 # production
 /client/build
 /cache
-/client/cache
+/client/src/cache
 /contracts/heroku.txt
 
 # misc
