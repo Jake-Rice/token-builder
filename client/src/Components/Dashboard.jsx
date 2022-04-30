@@ -28,6 +28,7 @@ const Dashboard = (props) => {
         address: '',
         name: '',
         symbol: '',
+        totalSupply: '',
         decimals: '',
         paused: false
     });
@@ -45,6 +46,7 @@ const Dashboard = (props) => {
         const pSymbol = props.web3.contract.symbol();
         const pDecimals = props.web3.contract.decimals();
         const [name, symbol, decimals] = await Promise.all([pName, pSymbol, pDecimals]);
+        const totalSupply = formatBalance((await props.web3.contract.totalSupply()).toString(), decimals);
         let paused;
         try {
             paused = await props.web3.contract.paused();
@@ -56,6 +58,7 @@ const Dashboard = (props) => {
             address: address,
             name: name,
             symbol: symbol,
+            totalSupply: totalSupply,
             decimals: decimals,
             paused: paused
         });
@@ -84,7 +87,6 @@ const Dashboard = (props) => {
         return bal;
     }
 
-    //============== Allowance Display ===============
     const updateAllowance = async () => {
         if (rxAddress.test(claimOwner)) {
             const decimals = await props.web3.contract.decimals();
@@ -115,7 +117,6 @@ const Dashboard = (props) => {
         }
         run();
     }, [userData.address, claimOwner]);
-    //============= /Allowance Display ===============
 
     useEffect(() => {
         const run = async () => {
@@ -223,8 +224,10 @@ const Dashboard = (props) => {
             <div className="form-row"><label>Token Address: {tokenData.address}</label></div>
             <div className="form-row"><label>Token Name: {tokenData.name}</label></div>
             <div className="form-row"><label>Token Symbol: {tokenData.symbol}</label></div>
+            <div className="form-row"><label>Decimal Places: {tokenData.decimals}</label></div>
+            <div className="form-row"><label>Total Supply: {tokenData.totalSupply} {tokenData.symbol}</label></div>
             <div className="form-row"><label>Account Address: {userData.address}</label></div>
-            <div className="form-row"><label>Token Balance: {userData.balance}</label></div>
+            <div className="form-row"><label>Token Balance: {userData.balance} {tokenData.symbol}</label></div>
             <div className="form-row"><label>Transfers Paused: {tokenData.paused ? "Yes" : "No"}</label></div>
             <hr/>
             <h3>Transfer Tokens</h3>

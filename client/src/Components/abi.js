@@ -4,6 +4,7 @@ const abi = [
     "function decimals() view returns (uint8)",
     "function name() view returns (string)",
     "function symbol() view returns (string)",
+    "function totalSupply() view returns (uint256)",
     "function paused() view returns (bool)", //only available if Pausable
     "function transfer(address to, uint amount) returns (bool)",
     "function transferFrom(address from, address to, uint256 amount) returns (bool)",

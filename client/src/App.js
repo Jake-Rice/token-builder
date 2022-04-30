@@ -90,24 +90,21 @@ function App() {
     });
   }
 
-  const handleUpdateContract = (addr) => {
+  const handleUpdateContract = async (addr) => {
     if (web3.contract) web3.contract.removeAllListeners();
     const contract = new ethers.Contract(addr, abi, web3.signer);
-    setWeb3({...web3, contract: contract});
+    //Test to see if contract is valid
+    try {
+      console.log((await contract.totalSupply()).toString());
+      console.log((await contract.balanceOf(await web3.signer.getAddress())).toString());
+      setWeb3({...web3, contract: contract});
+    } catch (err) {
+      alert("Error: Not a valid ERC20 token address.")
+    }
   }
 
   const showHelpModal = () => {
     toggleModal(true);
-  }
-
-  const formatBalance = (balance, dec) => {
-    if (dec === 0) return balance;
-    let bal = balance;
-    while (bal.length <= dec) bal = '0'+bal;
-    bal = bal.slice(0,0-dec)+'.'+bal.slice(0-dec);
-    while (bal[bal.length-1] === '0') bal = bal.slice(0,-1);
-    if (bal[bal.length-1] === '.') bal = bal.slice(0,-1);
-    return bal;
   }
 
   return (
