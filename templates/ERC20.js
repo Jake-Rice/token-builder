@@ -1,6 +1,4 @@
-module.exports.code = (name, pausable) => {
-    const contractName = toContractName(name);
-
+module.exports.code = (contractName, pausable) => {
     const header = 
 `//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;`;
@@ -48,10 +46,4 @@ import "@openzeppelin/contracts/security/Pausable.sol";`;
     let contractCode = header + "\n\n" + imports + "\n\n" + declaration + functions + `
 }`;
     return contractCode;
-}
-
-const toContractName = (name) => {
-    return name.slice(0,1).toUpperCase()+name.slice(1)
-    .replace(/[^(a-z)|(A-Z)][(a-z)]/g, (e) => { return e.slice(0,1)+e.slice(1).toUpperCase() })
-    .replace(/[^(a-z)|(A-Z)|(0-9)]/g, '');
 }

@@ -18,12 +18,12 @@ api.get('*', (req, res) => {
 })
 
 api.post('/api', (req, res) => {
-  const contractCode = erc20Template.code(req.body.name, req.body.pausable);
-  console.log(contractCode);
   const folderId = req.body.address;
   const name = req.body.name;
-  const contractName = parseFileName(name);
+  const contractName = toContractName(name);
   const filename = contractName+'.sol';
+  const contractCode = erc20Template.code(contractName, req.body.pausable);
+  console.log(contractCode);
   if (!fs.existsSync(`contracts/${folderId}`)) {
     fs.mkdirSync(`contracts/${folderId}`, (err) => {
       console.error(err);
@@ -97,18 +97,11 @@ api.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });
 
-const parseFileName = (name) => {
+const toContractName = (name) => {
   // in case the name is all numbers, whitespace and symbols
   if (name.search(/[A-Za-z]/) < 0) return "CustomERC20";
-  let arr = name.split('');
-  // start with the first letter
-  while (/[^A-Za-z]/.test(arr[0])) arr.shift();
-  for (let i=0; i<arr.length; i++) { //title case
-    if (i===0 || /[^A-Za-z0-9]/.test(arr[i-1])) arr[i] = arr[i].toUpperCase();
-  }
-  // remove symbols and whitespace
-  let output =  arr.filter((char) => {
-    return /[A-Za-z0-9]/.test(char);
-  }).join('');
-  return output;
+
+  return (name.slice(0,1).toUpperCase()+name.slice(1))
+  .replace(/[^[a-zA-Z][a-z]/g, (e) => { return e.slice(0,1)+e.slice(1).toUpperCase() })
+  .replace(/[^a-zA-Z0-9]/g, '');
 }
